@@ -1,0 +1,26 @@
+server {
+    # тут указываем порт по умолчанию для хоста 
+    listen 80;
+
+    # указываем хостинг для продакшина доменное имя
+    server_name docker-template.test;
+
+    # все все запросы идут frontend по роуту "/"
+    location / {
+        proxy_pass http://frontend:3000;
+    }
+
+    # все все запросы идут api по роуту "/api"
+    location /api {
+        proxy_pass http://api:3001;
+        # вырезаем и убираем api чтобы внутри сервиса не дублировать api строку
+        rewrite ^/api/(.*) /$1 break;
+    }
+
+    # все все запросы идут auth по роуту "/auth"
+    location /auth {
+        proxy_pass http://auth:3002;
+        # вырезаем и убираем auth чтобы внутри сервиса не дублировать auth строку
+        rewrite ^/auth/(.*) /$1 break;
+    }
+}

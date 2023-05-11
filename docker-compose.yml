@@ -1,0 +1,132 @@
+# единая точка входа для всех контейнеров
+version: "3"
+
+# имена сервисов контейнеров
+services:
+  # создаем nginx сервер, который будет проксировать все запросы
+  nginx:
+    image: nginx:stable-alpine
+    container_name: docker-template-nginx
+    # стандартный порт работы айпи адресов
+    ports:
+      - "80:80"
+    #  делаем симлинк и не меняем состояние при пересборке
+    volumes:
+      - ./nginx/nginx.conf.prod:/etc/nginx/conf.d/nginx.conf
+    # запускаем после запуска фронта и бэков а то упадет при прокси на фронтенд  
+    depends_on:
+      - frontend
+      - api
+      - auth
+      - mailer
+    # указываем имя нашей изолированной сети сервисов  
+    networks:
+      - docker-template  
+
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: docker-template-frontend
+    command: npm run start
+    restart: unless-stopped
+    networks:
+      - docker-template 
+
+  # сервис который работает с экспрессом
+  api:
+    build: ./api
+    # даем имя контейнера чтобы при запуске найти именно его
+    container_name: docker-template-api
+    # запуск сценария из package.json
+    command: npm run start
+    # всегда перезапускаем контейнер за исключением случаев когда остановлен вручную
+    restart: unless-stopped
+    # слева наружный порт контейнера справа внутренний порт приложения
+    # ports:
+    #   - "3001:3001"
+    # переменные окружения которые мы можем пробросить внутри контейнера  
+    environment:
+      - PORT=3001
+      # образец с 'mongodb://127.0.0.1:27017/api' просто локалхос меняем на хос образа монги
+      - MONGO_URL=mongodb://db_api:27017/api
+      - AUTH_URL=http://auth:3002
+    depends_on:
+      # запускаем его после запуска образа базы данных монго
+      - db_api
+    networks:
+      - docker-template 
+
+  # сервис который работает с базой данных берем готовый образ
+  db_api:
+    image: mongo:6.0.5-jammy
+    # даем имя контейнера чтобы при запуске найти именно его
+    container_name: docker-template-db-api
+    # прописав порты мы можем с компаса подключится во внутрь контейнера
+    ports:
+      - "27017:27017"
+    # выносим монгу за пределы контейнера, чтобы при пересборке БД не стиралась (симлинк ссылка)
+    volumes:
+      - mongodb_api:/data/db
+    networks:
+      - docker-template  
+
+  auth:
+    build: ./auth
+    container_name: docker-template-auth
+    command: npm run start
+    restart: unless-stopped
+    environment:
+      - PORT=3002
+      - MONGO_URL=mongodb://db_auth:27017/auth
+      - API_URL=http://api:3001
+      - API_MAILER=http://mailer:3003
+    depends_on:
+      - db_auth
+    networks:
+      - docker-template  
+
+  db_auth:
+    image: mongo:6.0.5-jammy
+    container_name: docker-template-db_auth
+    volumes:
+      - mongodb_auth:/data/db
+    networks:
+      - docker-template
+
+  mailer:
+    build: ./mailer
+    container_name: docker-template-mailer
+    command: npm run start
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003 
+      - LOGIN=${LOGIN_MAILER}
+      - PASSWORD=${PASSWORD_MAILER}
+      - MONGO_URL=mongodb://db_mailer:27017/mailer
+    depends_on:
+      - db_mailer
+    networks:
+      - docker-template    
+
+  db_mailer:
+    image: mongo:6.0.5-jammy
+    container_name: docker-template-db_mailer
+    volumes:
+      - mongodb_mailer:/data/db
+    networks:
+      - docker-template    
+
+volumes:
+  # чтобы иметь доступ везде к волюму они сохраняют состояние
+  mongodb_api:      
+  mongodb_auth:
+  mongodb_mailer:    
+
+# создаем свою изолированную сеть
+networks:
+  docker-template:
+    driver: bridge
