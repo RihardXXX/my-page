@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const app = express();
 const { port, dbPath, login, password } = require('./config');
 
+// тут будет сервис для отправки одноразового пароля на почту
+// а также сохранения и удаления одноразового пароля из БД
+// для дальнейшей генерации токена постоянной авторизации
 
 // start server and listen port
 const startServer = () => {

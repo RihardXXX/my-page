@@ -15,8 +15,15 @@ services:
     # чтобы фронтенд не падал и сокеты обновления страницы отрабатывали
     stdin_open: true
     tty: true
+    # указываю все папки в которых код будет симлинк ссылаться и меняться динамически
+    # корень нельзя указывать а то node-modules отсутствие подхватится
+    # если оставим зависимости которые на чипе м1 локальные то будет в контейнере конфликты
     volumes:
+      - ./frontend/layouts:/usr/src/app/layouts
+      - ./frontend/pages:/usr/src/app/pages
       - ./frontend/src:/usr/src/app/src
+      - ./frontend/components:/usr/src/app/components
+      - ./frontend/assets:/usr/src/app/assets
   api:
     command: npm run dev
     # эта папка будет не пересобираться заново

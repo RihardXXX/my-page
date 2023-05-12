@@ -3,7 +3,7 @@ server {
     listen 80;
 
     # указываем хостинг для продакшина доменное имя
-    server_name docker-template.test;
+    server_name my-page.prod;
 
     # все все запросы идут frontend по роуту "/"
     location / {

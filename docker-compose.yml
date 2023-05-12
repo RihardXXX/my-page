@@ -6,7 +6,7 @@ services:
   # создаем nginx сервер, который будет проксировать все запросы
   nginx:
     image: nginx:stable-alpine
-    container_name: docker-template-nginx
+    container_name: my-page-nginx
     # стандартный порт работы айпи адресов
     ports:
       - "80:80"
@@ -21,24 +21,24 @@ services:
       - mailer
     # указываем имя нашей изолированной сети сервисов  
     networks:
-      - docker-template  
+      - my-page  
 
 
   frontend:
     build: 
       context: ./frontend
       dockerfile: Dockerfile.prod
-    container_name: docker-template-frontend
+    container_name: my-page-frontend
     command: npm run start
     restart: unless-stopped
     networks:
-      - docker-template 
+      - my-page 
 
   # сервис который работает с экспрессом
   api:
     build: ./api
     # даем имя контейнера чтобы при запуске найти именно его
-    container_name: docker-template-api
+    container_name: my-page-api
     # запуск сценария из package.json
     command: npm run start
     # всегда перезапускаем контейнер за исключением случаев когда остановлен вручную
@@ -56,13 +56,13 @@ services:
       # запускаем его после запуска образа базы данных монго
       - db_api
     networks:
-      - docker-template 
+      - my-page 
 
   # сервис который работает с базой данных берем готовый образ
   db_api:
     image: mongo:6.0.5-jammy
     # даем имя контейнера чтобы при запуске найти именно его
-    container_name: docker-template-db-api
+    container_name: my-page-db-api
     # прописав порты мы можем с компаса подключится во внутрь контейнера
     ports:
       - "27017:27017"
@@ -70,11 +70,11 @@ services:
     volumes:
       - mongodb_api:/data/db
     networks:
-      - docker-template  
+      - my-page  
 
   auth:
     build: ./auth
-    container_name: docker-template-auth
+    container_name: my-page-auth
     command: npm run start
     restart: unless-stopped
     environment:
@@ -85,19 +85,19 @@ services:
     depends_on:
       - db_auth
     networks:
-      - docker-template  
+      - my-page  
 
   db_auth:
     image: mongo:6.0.5-jammy
-    container_name: docker-template-db_auth
+    container_name: my-page-db_auth
     volumes:
       - mongodb_auth:/data/db
     networks:
-      - docker-template
+      - my-page
 
   mailer:
     build: ./mailer
-    container_name: docker-template-mailer
+    container_name: my-page-mailer
     command: npm run start
     restart: unless-stopped
     ports:
@@ -110,15 +110,15 @@ services:
     depends_on:
       - db_mailer
     networks:
-      - docker-template    
+      - my-page    
 
   db_mailer:
     image: mongo:6.0.5-jammy
-    container_name: docker-template-db_mailer
+    container_name: my-page-db_mailer
     volumes:
       - mongodb_mailer:/data/db
     networks:
-      - docker-template    
+      - my-page    
 
 volumes:
   # чтобы иметь доступ везде к волюму они сохраняют состояние
@@ -128,5 +128,5 @@ volumes:
 
 # создаем свою изолированную сеть
 networks:
-  docker-template:
+  my-page:
     driver: bridge

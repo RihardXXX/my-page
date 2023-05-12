@@ -4,7 +4,9 @@ const app = express();
 const axios = require('axios'); // legacy way
 const { port, host, dbPath, authUrl } = require('./config');
 
-// test db Mongo
+
+// Внимание тут будет работать сервис по контенту страницы
+// Заполнение данных в админке и получение их
 
 const post = new mongoose.Schema({
     title: String, // String is shorthand for {type: String}

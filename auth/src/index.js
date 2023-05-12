@@ -4,6 +4,10 @@ const app = express();
 const axios = require('axios'); // legacy way
 const { port, host, dbPath, apiUrl } = require('./config');
 
+// Этот сервис нужен для авторизации разового пользователя
+// Для получения одноразовых паролей
+// А также генерации окончательного токена авторизации для кук или локалсториджа
+// не забываем устанавливать куку и следить за пользователями сайта
 
 // start server and listen port
 const startServer = () => {
