@@ -1,8 +1,5 @@
 <template>
   <div>
-    <h3>Welcome to the homepage</h3>
-    <p>
-      This is an auto-imported component
-    </p>
+      <h3>test rihard</h3>
   </div>
-</template>
+</template>;
