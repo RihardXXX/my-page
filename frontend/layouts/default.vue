@@ -1,8 +1,6 @@
 <template>
-    <div>
-        <h1>Header app</h1>
-        <slot />
-    </div>
+  <div>
+    <AppHeader />
+    <slot />
+  </div>
 </template>;
-
-<script lang="ts" setup></script>;

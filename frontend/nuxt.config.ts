@@ -1,12 +1,24 @@
-
+// @ts-ignore
+// import { defineNuxtConfig } from 'nuxt';
 // https://nuxt.com/docs/api/configuration/nuxt-config
 // @ts-ignore
-// eslint-disable-next-line no-undef
 export default defineNuxtConfig({
+  // @ts-ignore
+  css: ['@/assets/scss/bundle.scss'], // импортируем глобальный файл стилей
+  device: {
+    refreshOnResize: true
+  },
   modules: [
     '@nuxtjs/device'
   ],
-  device: {
-    refreshOnResize: true
+  vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          // импортируем миксины и переменные для стилей
+          additionalData: '@import "@/assets/scss/shared/_mixins.scss"; @import "@/assets/scss/shared/_variables.scss";'
+        }
+      }
+    }
   }
-});
+})

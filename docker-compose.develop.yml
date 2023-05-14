@@ -20,7 +20,7 @@ services:
     # если оставим зависимости которые на чипе м1 локальные то будет в контейнере конфликты
     volumes:
 #      - ./frontend/assets:/usr/src/app/assets
-#      - ./frontend/components:/usr/src/app/components
+      - ./frontend/components:/usr/src/app/components
 #      - ./frontend/config:/usr/src/app/config
       - ./frontend/layouts:/usr/src/app/layouts
       - ./frontend/pages:/usr/src/app/pages
