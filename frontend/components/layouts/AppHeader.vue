@@ -32,7 +32,8 @@
 </template>
 
 <script lang="ts" setup>
-// import { defineComponent, PropType } from 'vue';
+import { onMounted } from 'vue'
+import emitter from '~/utils/emitter'
 // import Dot, { size, color, IPosition } from '@/components/Dot.vue';
 // import { intersectionObserver } from '@/assets/utils';
 
@@ -45,58 +46,69 @@
 
 let idx = 1
 
-// Menu navigation ===
+// меню навигации ===
 interface MenuItem {
   id: number;
-  name: string;
-  ref: Element | undefined;
+  name: string; // имя меню
+  // будем динамически создавать в админке на английском языке и цеплять к секциям
+  eventName: string; // имя события, которое будет цепляться к секции определенной и доставаться дом элемент
+  element: Element | undefined; // сам элемент
 }
 
 const menu = ref<MenuItem[]>([
   {
     id: idx++,
     name: 'Обо мне',
-    ref: undefined
+    eventName: '',
+    element: undefined
   },
   {
     id: idx++,
     name: 'Навыки',
-    ref: undefined
+    eventName: '',
+    element: undefined
   },
   {
     id: idx++,
     name: 'Сертификаты',
-    ref: undefined
+    eventName: '',
+    element: undefined
   },
   {
     id: idx++,
     name: 'Отзывы',
-    ref: undefined
+    eventName: '',
+    element: undefined
   },
   {
     id: idx++,
     name: 'Портфолио',
-    ref: undefined
+    eventName: '',
+    element: undefined
   },
   {
     id: idx++,
     name: 'Контакты',
-    ref: undefined
+    eventName: '',
+    element: undefined
   }
 ])
 
 const selectSection = (menuitem: MenuItem):void => {
   console.log('selectSection', menuitem)
-  menuitem.ref?.scrollIntoView({ behavior: 'smooth' })
+  menuitem.element?.scrollIntoView({ behavior: 'smooth' })
 }
 
-type eventName = 'setRefAboutMe' | 'setRefSkills' | 'setRefCertificates';
-type menuName = 'Обо мне' | 'Навыки' | 'Сертификаты';
-
-interface IEventItem {
-  eventName: eventName;
-  menuName: menuName;
-}
+// устанавливаем в меню поле element дом элемент, чтобы мы могли скроллить
+onMounted(():void => {
+  menu.value = menu.value.map((menuItem: MenuItem):MenuItem => {
+    let newMenuItem:MenuItem = menuItem
+    emitter.on(menuItem.eventName, (element: Element) => {
+      newMenuItem = { ...menuItem, element }
+    })
+    return newMenuItem
+  })
+})
 
 //     dots: [
 //       {
@@ -125,44 +137,9 @@ interface IEventItem {
 //       },
 //     ] as Array<IDots>,
 //
-//     eventRefList: [
-//       {
-//         eventName: 'setRefAboutMe',
-//         menuName: 'Обо мне',
-//       },
-//       {
-//         eventName: 'setRefSkills',
-//         menuName: 'Навыки',
-//       },
-//       {
-//         eventName: 'setRefCertificates',
-//         menuName: 'Сертификаты',
-//       },
-//       {
-//         eventName: 'setRefReviews',
-//         menuName: 'Отзывы',
-//       },
-//       {
-//         eventName: 'setRefPortfolio',
-//         menuName: 'Портфолио',
-//       },
-//       {
-//         eventName: 'setRefContact',
-//         menuName: 'Контакты',
-//       },
-//     ] as Array<IEventItem>,
+
 //   };
 // }
-
-// created() {
-//   this.eventRefList.forEach(({ eventName, menuName }: IEventItem): void => {
-//     this.$nuxt.$on(eventName, (element: Element) => {
-//       this.menu = this.menu.map((m: MenuItem) =>
-//         m.name === menuName ? { ...m, ref: element } : { ...m }
-//       );
-//     });
-//   });
-// },
 
 // mounted(): void {
 //   const refHeader = this.$refs?.header as Element;
@@ -178,11 +155,6 @@ interface IEventItem {
 //   this.$emit('setHeaderRef', refHeader);
 // },
 //
-// methods: {
-//   selectSection(m: MenuItem): void {
-//     m.ref?.scrollIntoView({ behavior: 'smooth' });
-//   },
-// },
 
 </script>
 
@@ -272,7 +244,6 @@ interface IEventItem {
 
           .navItem {
             width: 30%;
-            margin-left: 0;
             margin: 0.5rem 0;
             font-weight: 600;
             font-size: 1.8rem;

@@ -9,8 +9,11 @@ export default defineNuxtConfig({
     refreshOnResize: true
   },
   modules: [
-    '@nuxtjs/device'
+    '@nuxtjs/device',
+    '@element-plus/nuxt',
+    'nuxt-icon'
   ],
+  elementPlus: { /** Options */ },
   vite: {
     css: {
       preprocessorOptions: {
