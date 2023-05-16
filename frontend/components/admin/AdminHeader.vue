@@ -8,20 +8,27 @@
     </ul>
     <el-card class="box-card">
       <h5>Создание элемента меню</h5>
-      <el-select v-model="typeMenu" class="m-2" placeholder="выберите тип меню" size="large" :style="{width: '100%'}">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        />
-      </el-select>
       <el-form
         ref="formRef"
         label-position="top"
         :model="menuValidateForm"
         class="demo-ruleForm"
       >
+        <el-form-item
+          label="Выберите тип меню"
+          prop="type"
+          :rules="[ {
+            required: true,
+            message: 'пожалуйста выберите тип создаваемого элемента меню',
+            trigger: 'change',
+          },]"
+        >
+          <el-select v-model="menuValidateForm.type" placeholder="Выберите тип меню" :style="{width: '100%'}">
+            <el-option label="меню со скроллом к секции" value="eventName" />
+            <el-option label="меню переход на другую страницу в приложении" value="pageItem" />
+            <el-option label="меню ссылка на сторонний ресурс" value="absolutLink" />
+          </el-select>
+        </el-form-item>
         <el-form-item
           label="название меню"
           prop="name"
@@ -37,7 +44,7 @@
           />
         </el-form-item>
         <el-form-item
-          label="название секции к которому скролим на английском"
+          :label="helpText"
           prop="nameSection"
           :rules="[
             { required: true, message: 'поле обязательно для заполнения' },
@@ -59,19 +66,48 @@
           </el-button>
         </el-form-item>
       </el-form>
+      <el-table :data="navData" border style="width: 100%; margin-top: 20px">
+        <el-table-column prop="name" label="Имя элемента меню" width="200" />
+        <el-table-column prop="nameSection" label="Значение элемента меню" width="350" />
+        <el-table-column prop="type" label="Тип элемента меню" />
+        <el-table-column fixed="right" label="Операции над элементом меню" width="300">
+          <template #default="scope">
+            <el-button type="warning" @click.prevent="editMenuItem(scope.row)">
+              редактировать
+            </el-button>
+            <el-popconfirm
+              confirm-button-text="да"
+              cancel-button-text="нет"
+              title="Вы действительно хотите удалить элемент меню"
+              width="400"
+              @confirm="deleteMenuItem(scope.row)"
+            >
+              <template #reference>
+                <el-button type="danger">
+                  удалить
+                </el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-card>
   </section>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import type { FormInstance } from 'element-plus'
+import { MenuItem } from '~/components/layouts/AppHeader.vue'
 
 // форма для валидации
 const formRef = ref<FormInstance>()
 
+let idx = 1
+
 // данные для отправки на сервер
 const menuValidateForm = reactive({
+  type: '',
   name: '',
   nameSection: ''
 })
@@ -82,6 +118,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
   formEl.validate((valid) => {
     if (valid) {
       console.log('submit!')
+      console.log('menuValidateForm: ', menuValidateForm)
     } else {
       console.log('error submit!')
       return false
@@ -95,23 +132,58 @@ const resetForm = (formEl: FormInstance | undefined) => {
   formEl.resetFields()
 }
 
-// выбор типа меню для хедара
-const typeMenu = ref('')
+// подсказка для лейбла инпута
+const helpText = computed<string>(() => {
+  switch (menuValidateForm.type) {
+    case 'eventName':
+      return 'сюда пишем название секции куда будем скролить на английском'
+    case 'pageItem':
+      return 'сюда пишем название страницы куда будем переходить'
+    case 'absolutLink':
+      return 'сюда пишем абсолютную ссылку для перезода на сторонную страницу'
+    default:
+      return 'сюда пишем название секции куда будем скролить на английском'
+  }
+})
 
-const options = [
+// меню которые уже созданы и в БД
+const navData: Array<MenuItem> = [
   {
-    label: 'меню со скроллом к секции',
-    value: 'Option1'
+    id: idx++,
+    name: 'обо мне',
+    nameSection: 'aboutMe',
+    type: 'eventName'
   },
   {
-    label: 'меню ссылка на сторонний ресурс',
-    value: 'Option2'
+    id: idx++,
+    name: 'блог',
+    nameSection: 'blog',
+    type: 'pageItem'
   },
   {
-    label: 'меню переход на другую страницу в приложении',
-    value: 'Option3'
+    id: idx++,
+    name: 'поисковая ссылка',
+    nameSection: 'yandex.ru',
+    type: 'absolutLink'
   }
 ]
+
+// edit nav
+const editMenuItem = (row: MenuItem) => {
+  console.log(row)
+  // navData.splice(index, 1)
+}
+
+// delete item
+const deleteMenuItem = (row: MenuItem) => {
+  console.log(row.id)
+  // navData.splice(index, 1)
+}
+
+// получение элементов меню с сервера
+// https://nuxt.com/docs/api/composables/use-fetch подробная инфа
+// const { pending, data: posts } = await useLazyFetch('/api/posts')
+
 </script>
 
 <style lang="scss" module>

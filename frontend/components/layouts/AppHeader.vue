@@ -47,8 +47,8 @@ import emitter from '~/utils/emitter'
 let idx = 1
 
 // меню навигации ===
-interface MenuItem {
-  id: number;
+export interface MenuItem {
+  id: number | string;
   name: string; // имя меню
   // будем динамически создавать в админке на английском языке и цеплять к секциям
   eventName: string; // имя события, которое будет цепляться к секции определенной и доставаться дом элемент
