@@ -72,7 +72,7 @@ const typeDefs = gql`
 #        contact: String
 #    },
     type Query {
-        test: [String!]!
+        test: String!
 #        advert(id: String!): Advert!
 #        advertFeed(offset: Int!, limit: Int!): AdvertFeed
 #        advertFeedFavorite(offset: Int!, limit: Int!): AdvertFeed

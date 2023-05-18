@@ -6,7 +6,8 @@ const { GraphQLError } = require('graphql');
 const Query = {
 
     test: (parent, args) => {
-      return 'return test from test query';
+        // Находим всех пользователей
+        return 'хуйня у коня';
     },
 
     // ads: async (parent, args) => {
