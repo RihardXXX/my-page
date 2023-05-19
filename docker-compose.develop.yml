@@ -25,21 +25,22 @@ services:
       - ./frontend/layouts:/usr/src/app/layouts
       - ./frontend/pages:/usr/src/app/pages
       - ./frontend/utils:/usr/src/app/utils
+      - ./frontend/apollo:/usr/src/app/apollo
 #      - ./frontend/static:/usr/src/app/static
   api:
     command: npm run dev
     # эта папка будет не пересобираться заново
-    # слева это то что берем с папки 
+    # слева это то что берем с папки
     # и делаем симлинк внутри контейнера сохраняя состояние
     volumes:
       - ./api/src:/usr/src/app/src
 
-  auth: 
+  auth:
     command: npm run dev
     volumes:
       - ./auth/src:/usr/src/app/src
 
-  mailer: 
+  mailer:
     command: npm run dev
     volumes:
-      - ./mailer/src:/usr/src/app/src    
+      - ./mailer/src:/usr/src/app/src

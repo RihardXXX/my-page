@@ -3,6 +3,9 @@ const gql = require('graphql-tag');
 // описанная схема
 const typeDefs = gql`
     scalar DateTime
+    type Xxx{
+        name: String!
+    }
 #    type User {
 #        id: ID!
 #        username: String!
@@ -72,7 +75,7 @@ const typeDefs = gql`
 #        contact: String
 #    },
     type Query {
-        test: String!
+        test: Xxx!
 #        advert(id: String!): Advert!
 #        advertFeed(offset: Int!, limit: Int!): AdvertFeed
 #        advertFeedFavorite(offset: Int!, limit: Int!): AdvertFeed

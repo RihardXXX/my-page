@@ -34,6 +34,7 @@
 <script lang="ts" setup>
 import { onMounted } from 'vue'
 import emitter from '~/utils/emitter'
+import { TEST } from '~/apollo/query'
 // import Dot, { size, color, IPosition } from '@/components/Dot.vue';
 // import { intersectionObserver } from '@/assets/utils';
 
@@ -43,6 +44,10 @@ import emitter from '~/utils/emitter'
 //   color: color;
 //   position: IPosition;
 // }
+
+const { data } = await useAsyncQuery(TEST)
+// @ts-ignore
+console.log('result: ', data.value.test.name)
 
 let idx = 1
 

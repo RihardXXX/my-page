@@ -13,19 +13,19 @@ services:
     #  делаем симлинк и не меняем состояние при пересборке
     volumes:
       - ./nginx/nginx.conf.prod:/etc/nginx/conf.d/nginx.conf
-    # запускаем после запуска фронта и бэков а то упадет при прокси на фронтенд  
+    # запускаем после запуска фронта и бэков а то упадет при прокси на фронтенд
     depends_on:
       - frontend
       - api
       - auth
       - mailer
-    # указываем имя нашей изолированной сети сервисов  
+    # указываем имя нашей изолированной сети сервисов
     networks:
-      - my-page  
+      - my-page
 
 
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile.prod
     container_name: my-page-frontend
@@ -33,8 +33,11 @@ services:
 #      - "3000:3000"
     command: npm run start
     restart: unless-stopped
+    environment:
+      # пробрасываем путь работы с апи так как относительный путь на фронте не работает
+      - API_URL=http://api:3001
     networks:
-      - my-page 
+      - my-page
 
   # сервис который работает с экспрессом
   api:
@@ -48,7 +51,7 @@ services:
     # слева наружный порт контейнера справа внутренний порт приложения
     # ports:
     #   - "3001:3001"
-    # переменные окружения которые мы можем пробросить внутри контейнера  
+    # переменные окружения которые мы можем пробросить внутри контейнера
     environment:
       - PORT=3001
       # образец с 'mongodb://127.0.0.1:27017/api' просто локалхос меняем на хос образа монги
@@ -58,7 +61,7 @@ services:
       # запускаем его после запуска образа базы данных монго
       - db_api
     networks:
-      - my-page 
+      - my-page
 
   # сервис который работает с базой данных берем готовый образ
   db_api:
@@ -72,7 +75,7 @@ services:
     volumes:
       - mongodb_api:/data/db
     networks:
-      - my-page  
+      - my-page
 
   auth:
     build: ./auth
@@ -87,7 +90,7 @@ services:
     depends_on:
       - db_auth
     networks:
-      - my-page  
+      - my-page
 
   db_auth:
     image: mongo:6.0.5-jammy
@@ -105,14 +108,14 @@ services:
     ports:
       - "3003:3003"
     environment:
-      - PORT=3003 
+      - PORT=3003
       - LOGIN=${LOGIN_MAILER}
       - PASSWORD=${PASSWORD_MAILER}
       - MONGO_URL=mongodb://db_mailer:27017/mailer
     depends_on:
       - db_mailer
     networks:
-      - my-page    
+      - my-page
 
   db_mailer:
     image: mongo:6.0.5-jammy
@@ -120,13 +123,13 @@ services:
     volumes:
       - mongodb_mailer:/data/db
     networks:
-      - my-page    
+      - my-page
 
 volumes:
   # чтобы иметь доступ везде к волюму они сохраняют состояние
-  mongodb_api:      
+  mongodb_api:
   mongodb_auth:
-  mongodb_mailer:    
+  mongodb_mailer:
 
 # создаем свою изолированную сеть
 networks:

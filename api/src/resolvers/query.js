@@ -7,7 +7,7 @@ const Query = {
 
     test: (parent, args) => {
         // Находим всех пользователей
-        return 'хуйня у коня';
+        return { name: 'name' };
     },
 
     // ads: async (parent, args) => {
