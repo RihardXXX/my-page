@@ -1,14 +1,13 @@
 // @ts-ignore
-import { defineNuxtConfig } from 'nuxt/config'
+import { defineNuxtConfig } from 'nuxt/config';
+import { api_client, api_ssr } from './config';
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-const endPoint = process.env.API_URL
-
-console.log('endPoint', endPoint)
 
 export default defineNuxtConfig({
   // @ts-ignore
   css: ['@/assets/scss/bundle.scss'], // импортируем глобальный файл стилей
+  // @ts-ignore
   device: {
     refreshOnResize: true
   },
@@ -26,25 +25,23 @@ export default defineNuxtConfig({
     authType: 'Bearer',
     authHeader: 'Authorization',
     tokenStorage: 'cookie',
-    proxyCookies: true,
+    // proxyCookies: true,
     clients: {
       default: {
-        httpEndpoint: endPoint || '/api'
-        // browserHttpEndpoint: '',
-        // wsEndpoint: '',
-        // httpLinkOptions: {},
-        // wsLinkOptions: {},
-        // // wsEndpoint: '',
-        // websocketsOnly: false,
-        // connectToDevTools: true,
-        // defaultOptions: {},
-        // inMemoryCacheOptions: {},
+        httpEndpoint: api_ssr || '',
+        browserHttpEndpoint: api_client || '/api',
+        wsEndpoint: '',
+        httpLinkOptions: {},
+        wsLinkOptions: {},
+        websocketsOnly: false,
+        connectToDevTools: false,
+        defaultOptions: {},
+        inMemoryCacheOptions: {},
         // tokenName: 'apollo:<client-name>.token',
-        // tokenStorage: 'cookie',
-        // authType: 'Bearer',
-        // authHeader: 'Authorization'
-      }
-      // other: './apollo/other.ts'
+        tokenStorage: 'cookie',
+        authType: 'Bearer',
+        authHeader: 'Authorization'
+      },
     }
   },
   vite: {

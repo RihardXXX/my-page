@@ -34,8 +34,10 @@ services:
     command: npm run start
     restart: unless-stopped
     environment:
-      # пробрасываем путь работы с апи так как относительный путь на фронте не работает
-      - API_URL=http://api:3001
+      # пробрасываем путь работы с апи в режиме ssr из сервера nuxt к серверу апи для useQuery
+      - API_SSR=http://api:3001
+      # пробрасываем путь работы с апи в режиме client из браузера nuxt к серверу апи для useMutation
+      - API_CLIENT=/api
     networks:
       - my-page
 

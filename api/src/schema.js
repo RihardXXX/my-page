@@ -6,6 +6,14 @@ const typeDefs = gql`
     type Xxx{
         name: String!
     }
+    type NavItem {
+        _id: ID!
+        name: String!
+        nameSection: String!
+        type: String!
+        createdAt: DateTime!
+        updatedAt: DateTime!
+    },
 #    type User {
 #        id: ID!
 #        username: String!
@@ -89,6 +97,7 @@ const typeDefs = gql`
 #        testMailer(email: String!, message: String!): Boolean!
     },
     type Mutation {
+        createNavItem(name: String!, nameSection: String!, type: String!): Xxx!
 #        newAdvert(name: String!, content: String!, category: [String!]!, contact: String): Advert!
 #        updateAdvert(id: ID!, fields: Advertfield): Advert!
         test(id: String!): String!

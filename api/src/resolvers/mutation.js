@@ -17,9 +17,17 @@
 
 const Mutation = {
 
-    test: (parent, { id }) => {
-        return `return test mutations id: ${id}`;
-    }
+    // test: (parent, { id }) => {
+    //     return `return test mutations id: ${id}`;
+    // },
+    createNavItem: (parent, { name, nameSection, type }) => {
+        console.log('+++++++++++++');
+        console.log('name: ', name);
+        console.log('nameSection: ', nameSection);
+        console.log('type: ', type);
+        console.log('++++++++++++++');
+        return { name: 'name' };
+    },
     // newAdvert: async (parent, { name, content, category, contact }, { idUser }) => {
     //
     //     errorAuth(idUser);

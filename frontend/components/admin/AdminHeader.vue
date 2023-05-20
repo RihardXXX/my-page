@@ -23,7 +23,7 @@
             trigger: 'change',
           },]"
         >
-          <el-select v-model="menuValidateForm.type" placeholder="Выберите тип меню" :style="{width: '100%'}">
+          <el-select v-model="menuValidateForm.type" :disabled="loading" placeholder="Выберите тип меню" :style="{width: '100%'}">
             <el-option label="меню со скроллом к секции" value="eventName" />
             <el-option label="меню переход на другую страницу в приложении" value="pageItem" />
             <el-option label="меню ссылка на сторонний ресурс" value="absolutLink" />
@@ -41,6 +41,7 @@
             v-model.number="menuValidateForm.name"
             type="text"
             autocomplete="off"
+            :disabled="loading"
           />
         </el-form-item>
         <el-form-item
@@ -55,6 +56,7 @@
             v-model.number="menuValidateForm.nameSection"
             type="text"
             autocomplete="off"
+            :disabled="loading"
           />
         </el-form-item>
         <el-form-item>
@@ -160,9 +162,12 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, computed } from 'vue'
-import type { FormInstance } from 'element-plus'
-import { MenuItem } from '~/components/layouts/AppHeader.vue'
+import { reactive, ref, computed } from 'vue';
+import type { FormInstance } from 'element-plus';
+import { MenuItem } from '~/components/layouts/AppHeader.vue';
+import { CREATE_NAV_ITEM } from "~/apollo/mutation";
+
+
 
 // форма для валидации ref for create item
 const formCreateItem = ref<FormInstance>()
@@ -182,6 +187,16 @@ const menuValidateForm: INavItem = reactive({
   nameSection: ''
 })
 
+const variables = {
+  name: 'name111',
+  nameSection: 'nameSection222',
+  type: 'type3333'
+};
+
+const { mutate } = useMutation(CREATE_NAV_ITEM, { variables })
+
+// const { mutate: sendMessage } = useMutation(CREATE_NAV_ITEM);
+
 // валидация и отправка на сервер
 const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) { return }
@@ -189,6 +204,9 @@ const submitForm = (formEl: FormInstance | undefined) => {
     if (valid) {
       console.log('submit!')
       console.log('menuValidateForm: ', menuValidateForm)
+      // isLoading.value = true;
+      // setTimeout(() => isLoading.value = false, 2000);
+      mutate();
     } else {
       console.log('error submit!')
       return false

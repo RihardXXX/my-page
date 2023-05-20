@@ -1,5 +1,6 @@
 <template>
   <header :class="$style.headerWrap">
+    result: {{ result ? result : 'test' }}
     <!--    <Dot-->
     <!--      v-for="dot in dots"-->
     <!--      :key="dot.id"-->
@@ -45,11 +46,12 @@ import { TEST } from '~/apollo/query'
 //   position: IPosition;
 // }
 
-const { data } = await useAsyncQuery(TEST)
-// @ts-ignore
-console.log('result: ', data.value.test.name)
+// const { data } = await useAsyncQuery(TEST)
 
-let idx = 1
+const { result } = useQuery(TEST);
+// @ts-ignore
+
+let idx = 1;
 
 // меню навигации ===
 export interface MenuItem {

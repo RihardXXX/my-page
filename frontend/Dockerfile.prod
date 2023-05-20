@@ -1,5 +1,5 @@
 # указываем версию ноды сервисе
-FROM node:18.16-alpine
+FROM node:16.20-alpine
 
 # указываем рабочую папку она может быть любая
 WORKDIR /usr/src/app
@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # устанавливаем зависимости
-RUN npm install
+RUN npm install --force
 
 # копируем все содержимое папки api (src and ...)  в корневую папку
 COPY . .

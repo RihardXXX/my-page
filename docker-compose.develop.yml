@@ -21,11 +21,12 @@ services:
     volumes:
       - ./frontend/assets:/usr/src/app/assets
       - ./frontend/components:/usr/src/app/components
-#      - ./frontend/config:/usr/src/app/config
+      - ./frontend/config:/usr/src/app/config
       - ./frontend/layouts:/usr/src/app/layouts
       - ./frontend/pages:/usr/src/app/pages
       - ./frontend/utils:/usr/src/app/utils
       - ./frontend/apollo:/usr/src/app/apollo
+      - ./frontend/plugins:/usr/src/app/plugins
 #      - ./frontend/static:/usr/src/app/static
   api:
     command: npm run dev
