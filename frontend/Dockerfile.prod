@@ -13,5 +13,14 @@ RUN npm install --force
 # копируем все содержимое папки api (src and ...)  в корневую папку
 COPY . .
 
+
+# === переменные окружения для билд сборки приложения, которые отпр из docker-compose.yml from args
+ARG API_SSR
+ARG API_CLIENT
+
+ENV API_SSR $API_SSR
+ENV API_CLIENT $API_CLIENT
+# ===
+
 # билдим для прода проект
 RUN npm run build

@@ -36,9 +36,10 @@
 import { onMounted } from 'vue'
 import emitter from '~/utils/emitter'
 import { TEST } from '~/apollo/query'
+import * as process from "process";
 // import Dot, { size, color, IPosition } from '@/components/Dot.vue';
 // import { intersectionObserver } from '@/assets/utils';
-
+console.log(process.env);
 // export interface IDots {
 //   id: number | string;
 //   size: size;

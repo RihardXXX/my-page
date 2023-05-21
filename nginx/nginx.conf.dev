@@ -1,5 +1,5 @@
 server {
-    # тут указываем порт по умолчанию для хоста 
+    # тут указываем порт по умолчанию для хоста
     listen 80;
 
     # указываем хостинг для продакшина доменное имя
@@ -9,9 +9,9 @@ server {
     location / {
         proxy_pass http://frontend:3000;
 
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        # proxy_http_version 1.1;
+        # proxy_set_header Upgrade $http_upgrade;
+        # proxy_set_header Connection "upgrade";
     }
 
     # все все запросы идут api по роуту "/api"

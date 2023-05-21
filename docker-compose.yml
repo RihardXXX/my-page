@@ -27,10 +27,12 @@ services:
   frontend:
     build:
       context: ./frontend
+      # эти переменные среды которые должны подхватываться во время build сборки для ssr and client
+      args:
+        - API_SSR=http://api:3001
+        - API_CLIENT=/api
       dockerfile: Dockerfile.prod
     container_name: my-page-frontend
-#    ports:
-#      - "3000:3000"
     command: npm run start
     restart: unless-stopped
     environment:

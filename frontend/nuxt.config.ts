@@ -3,7 +3,6 @@ import { defineNuxtConfig } from 'nuxt/config';
 import { api_client, api_ssr } from './config';
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-
 export default defineNuxtConfig({
   // @ts-ignore
   css: ['@/assets/scss/bundle.scss'], // импортируем глобальный файл стилей
@@ -28,13 +27,13 @@ export default defineNuxtConfig({
     // proxyCookies: true,
     clients: {
       default: {
-        httpEndpoint: api_ssr || '',
-        browserHttpEndpoint: api_client || '/api',
-        wsEndpoint: '',
+        httpEndpoint: process.env.API_SSR,
+        browserHttpEndpoint: process.env.API_CLIENT,
+        // wsEndpoint: '',
         httpLinkOptions: {},
         wsLinkOptions: {},
-        websocketsOnly: false,
-        connectToDevTools: false,
+        // websocketsOnly: false,
+        connectToDevTools: true,
         defaultOptions: {},
         inMemoryCacheOptions: {},
         // tokenName: 'apollo:<client-name>.token',
