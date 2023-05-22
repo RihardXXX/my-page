@@ -1,4 +1,4 @@
-// const { Advert, User, Comment, GenerateLink, ChangePassword } = require('../models');
+const { NavItem } = require('../models');
 // const bcrypt = require('bcrypt');
 // const jwt = require('jsonwebtoken');
 // const { gravatar } = require('../util/gravatar');
@@ -7,26 +7,53 @@
 // const mongoose = require('mongoose');
 // const nodemailer = require("nodemailer");
 // const { v4: uuidv4 } = require('uuid');
-// Берем с переменной окружения порт, путь к апи, путь подключения в БД
-// require('dotenv').config();
-
-// const port = process.env.PORT || 4000;
-// const api_url = process.env.API_URL || '/api';
-// const domain = process.env.DOMAIN || 'http://localhost:';
-
+const { errorField } =  require('../utils/utils');
 
 const Mutation = {
 
     // test: (parent, { id }) => {
     //     return `return test mutations id: ${id}`;
     // },
-    createNavItem: (parent, { name, nameSection, type }) => {
-        console.log('+++++++++++++');
-        console.log('name: ', name);
-        console.log('nameSection: ', nameSection);
-        console.log('type: ', type);
-        console.log('++++++++++++++');
-        return { name: 'name' };
+    createNavItem: async (parent, { name, nameSection, type }) => {
+        // План
+        // 1. Проверка авторизации сделать позже -
+        // 2. Проверить есть ли пустые поля +
+        // 3. если нет пустых полей то создать элемент меню +
+        // 4. вернуть созданный элемент +
+        errorField('не все поля заполнены для создания элемента навигации хедара', name, nameSection, type);
+
+        try {
+            const navItem = await NavItem.create({
+                name,
+                nameSection,
+                type,
+            });
+
+            await navItem.save();
+
+            return navItem;
+        } catch (e) {
+            console.log('Mutation/createNavItem error: ', e);
+            return false;
+        }
+    },
+
+    deleteNavItem: async (parent, { id }) => {
+
+        // проверка на авторизацию
+        // находим элемент меню
+        // удаляем элемент меню
+        // возвращаем boolean
+
+        errorField('айди элемента обязателен для удаления элемента меню', id);
+
+        try {
+            await NavItem.deleteOne({ _id: id });
+            return true;
+        } catch (e) {
+            console.log('Mutation/deleteNavItem error: ', e);
+            return false;
+        }
     },
     // newAdvert: async (parent, { name, content, category, contact }, { idUser }) => {
     //

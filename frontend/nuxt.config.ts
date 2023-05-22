@@ -27,8 +27,8 @@ export default defineNuxtConfig({
     // proxyCookies: true,
     clients: {
       default: {
-        httpEndpoint: process.env.API_SSR,
-        browserHttpEndpoint: process.env.API_CLIENT,
+        httpEndpoint: process.env.API_SSR, // useQuery endpoint
+        browserHttpEndpoint: process.env.API_CLIENT, // useMutation endpoint
         // wsEndpoint: '',
         httpLinkOptions: {},
         wsLinkOptions: {},

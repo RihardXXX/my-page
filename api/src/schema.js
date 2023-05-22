@@ -97,7 +97,8 @@ const typeDefs = gql`
 #        testMailer(email: String!, message: String!): Boolean!
     },
     type Mutation {
-        createNavItem(name: String!, nameSection: String!, type: String!): Xxx!
+        createNavItem(name: String!, nameSection: String!, type: String!): NavItem!
+        deleteNavItem(id: ID!): Boolean
 #        newAdvert(name: String!, content: String!, category: [String!]!, contact: String): Advert!
 #        updateAdvert(id: ID!, fields: Advertfield): Advert!
         test(id: String!): String!
