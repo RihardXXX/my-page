@@ -23,7 +23,7 @@
             trigger: 'change',
           },]"
         >
-          <el-select v-model="menuValidateForm.type" :disabled="loading" placeholder="Выберите тип меню" :style="{width: '100%'}">
+          <el-select v-model="menuValidateForm.type" :disabled="isLoadingCreatNavItem" placeholder="Выберите тип меню" :style="{width: '100%'}">
             <el-option label="меню со скроллом к секции" value="eventName" />
             <el-option label="меню переход на другую страницу в приложении" value="pageItem" />
             <el-option label="меню ссылка на сторонний ресурс" value="absolutLink" />
@@ -41,7 +41,7 @@
             v-model.number="menuValidateForm.name"
             type="text"
             autocomplete="off"
-            :disabled="loading"
+            :disabled="isLoadingCreatNavItem"
           />
         </el-form-item>
         <el-form-item
@@ -56,7 +56,7 @@
             v-model.number="menuValidateForm.nameSection"
             type="text"
             autocomplete="off"
-            :disabled="loading"
+            :disabled="isLoadingCreatNavItem"
           />
         </el-form-item>
         <el-form-item>
@@ -68,7 +68,16 @@
           </el-button>
         </el-form-item>
       </el-form>
-      <el-table :data="navData" border style="width: 100%; margin-top: 20px">
+      <el-table
+        v-loading="isLoadingCreatNavItem || isLoadingMenuHeader || isLoadingDeleteNavItem"
+        :data="menuNavigationHeader"
+        border
+        style="width: 100%; margin-top: 20px"
+        :element-loading-svg="svg"
+        class="custom-loading-svg"
+        element-loading-svg-view-box="-10, -10, 50, 50"
+        empty-text="отсутствуют элементы для хедара, создайте их"
+      >
         <el-table-column prop="name" label="Имя элемента меню" width="200" />
         <el-table-column prop="nameSection" label="Значение элемента меню" width="350" />
         <el-table-column prop="type" label="Тип элемента меню" />
@@ -164,49 +173,71 @@
 <script lang="ts" setup>
 import { reactive, ref, computed } from 'vue';
 import type { FormInstance } from 'element-plus';
-import { MenuItem } from '~/components/layouts/AppHeader.vue';
-import { CREATE_NAV_ITEM } from "~/apollo/mutation";
+import { useMutation, useQuery } from '@vue/apollo-composable';
+// import { MenuItem } from '~/components/layouts/AppHeader.vue';
+import { CREATE_NAV_ITEM, DELETE_NAV_ITEM } from '~/apollo/mutation';
+import { GET_MENU_HEADER } from '~/apollo/query';
 
+const svg = `
+        <path class="path" d="
+          M 30 15
+          L 28 17
+          M 25.61 25.61
+          A 15 15, 0, 0, 1, 15 30
+          A 15 15, 0, 1, 1, 27.99 7.5
+          L 15 15
+        " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
+      `
 
+// ============== Получение меню навигации для Хедара
+interface INavItem {
+  __typename: string,
+  name: string,
+  nameSection: string,
+  type: string,
+  _id: string
+}
+
+// инициализация элементов меню
+const { result: menuHeaderList, loading: isLoadingMenuHeader, refetch } = useQuery(GET_MENU_HEADER)
+
+const menuNavigationHeader = computed<INavItem[] | []>(() => {
+  return menuHeaderList.value.getMenuHeader
+})
+// =============
+
+interface IValidForm {
+  type: string | '',
+  name: string| '',
+  nameSection: string | ''
+}
 
 // форма для валидации ref for create item
 const formCreateItem = ref<FormInstance>()
-
-let idx = 1
-
-interface INavItem {
-  type: string,
-  name: string,
-  nameSection: string
-}
-
 // данные для отправки на сервер
-const menuValidateForm: INavItem = reactive({
+const menuValidateForm: IValidForm = reactive({
   type: '',
   name: '',
   nameSection: ''
 })
-
-const variables = {
-  name: 'name111',
-  nameSection: 'nameSection222',
-  type: 'type3333'
-};
-
-const { mutate } = useMutation(CREATE_NAV_ITEM, { variables })
-
-// const { mutate: sendMessage } = useMutation(CREATE_NAV_ITEM);
-
+// создание и удаление элементов меню
+const { mutate: createNavItem, loading: isLoadingCreatNavItem, onDone: onDoneCreate } = useMutation(CREATE_NAV_ITEM)
+const { mutate: deleteNavItem, loading: isLoadingDeleteNavItem, onDone: onDoneDelete } = useMutation(DELETE_NAV_ITEM)
 // валидация и отправка на сервер
 const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) { return }
   formEl.validate((valid) => {
     if (valid) {
-      console.log('submit!')
-      console.log('menuValidateForm: ', menuValidateForm)
-      // isLoading.value = true;
-      // setTimeout(() => isLoading.value = false, 2000);
-      mutate();
+      createNavItem({
+        name: menuValidateForm.name,
+        nameSection: menuValidateForm.nameSection,
+        type: menuValidateForm.type
+      })
+      onDoneCreate(() => {
+        // обновление состояния меню и стирание инпутов
+        refetch()
+        formEl.resetFields()
+      })
     } else {
       console.log('error submit!')
       return false
@@ -238,37 +269,15 @@ const helpTextCreate = computed<string>(() => {
   return generateHelpText(menuValidateForm.type)
 })
 
-// меню которые уже созданы и в БД
-const navData: Array<MenuItem> = [
-  {
-    id: idx++,
-    name: 'обо мне',
-    nameSection: 'aboutMe',
-    type: 'eventName'
-  },
-  {
-    id: idx++,
-    name: 'блог',
-    nameSection: 'blog',
-    type: 'pageItem'
-  },
-  {
-    id: idx++,
-    name: 'поисковая ссылка',
-    nameSection: 'yandex.ru',
-    type: 'absolutLink'
-  }
-]
-
 // delete item
-const deleteMenuItem = (row: MenuItem) => {
-  console.log(row.id)
-  // navData.splice(index, 1)
+const deleteMenuItem = (row: INavItem) => {
+  deleteNavItem({
+    deleteNavItemId: row._id
+  })
+  onDoneDelete(() => {
+    refetch()
+  })
 }
-
-// получение элементов меню с сервера
-// https://nuxt.com/docs/api/composables/use-fetch подробная инфа
-// const { pending, data: posts } = await useLazyFetch('/api/posts')
 
 // модалка для редактирования элементов меню
 const dialogEditMenuItem = ref(false)
@@ -277,7 +286,7 @@ const dialogEditMenuItem = ref(false)
 const formEditItem = ref<FormInstance>()
 
 // данные для редактирования в модалке
-const formEditNavItem: INavItem = reactive({
+const formEditNavItem: IValidForm = reactive({
   type: '',
   name: '',
   nameSection: ''
@@ -303,8 +312,8 @@ const editMenuItemSave = async (formEl: FormInstance | undefined):Promise<void> 
       // после отправки на сервер закрываем окно
       dialogEditMenuItem.value = false
     } else {
-      console.log('error submit!')
-      return false
+      console.log('error submit!');
+      return false;
     }
   })
 }

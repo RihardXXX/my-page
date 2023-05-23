@@ -84,6 +84,7 @@ const typeDefs = gql`
 #    },
     type Query {
         test: Xxx!
+        getMenuHeader: [NavItem]!
 #        advert(id: String!): Advert!
 #        advertFeed(offset: Int!, limit: Int!): AdvertFeed
 #        advertFeedFavorite(offset: Int!, limit: Int!): AdvertFeed

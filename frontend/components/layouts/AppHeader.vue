@@ -1,6 +1,6 @@
 <template>
   <header :class="$style.headerWrap">
-    result: {{ result ? result : 'test' }}
+    <!--    result: {{ result ? result : 'test' }}-->
     <!--    <Dot-->
     <!--      v-for="dot in dots"-->
     <!--      :key="dot.id"-->
@@ -33,10 +33,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
-import emitter from '~/utils/emitter';
-import { TEST } from '~/apollo/query';
-import { useQuery } from "@vue/apollo-composable";
+import { onMounted, ref } from 'vue'
+// import { useQuery } from '@vue/apollo-composable';
+import emitter from '~/utils/emitter'
 // import Dot, { size, color, IPosition } from '@/components/Dot.vue';
 // import { intersectionObserver } from '@/assets/utils';
 
@@ -49,10 +48,10 @@ import { useQuery } from "@vue/apollo-composable";
 
 // const { data } = await useAsyncQuery(TEST)
 
-const { result } = useQuery(TEST);
+// const { result } = useQuery(TEST)
 // @ts-ignore
 
-let idx = 1;
+let idx = 1
 
 // меню навигации ===
 export interface MenuItem {

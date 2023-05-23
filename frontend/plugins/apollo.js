@@ -1,4 +1,4 @@
-import {provideApolloClient} from '@vue/apollo-composable';
+import { provideApolloClient } from '@vue/apollo-composable'
 
 export default defineNuxtPlugin(() => {
   // ts-ignore

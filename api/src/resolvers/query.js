@@ -1,5 +1,6 @@
 // const { Advert, User, Comment } = require('../models');
 const { GraphQLError } = require('graphql');
+const { NavItem } = require('../models');
 // const { errorAuth, errorField, errorNotItem, error403, isEmptyObject, getUser } = require('../util/utils');
 // const nodemailer = require("nodemailer");
 
@@ -10,6 +11,14 @@ const Query = {
         return { name: 'name' };
     },
 
+    getMenuHeader: async () => {
+        try {
+            // проверка авторизации
+            return await NavItem.find().limit(100);
+        } catch (error) {
+            console.log('Query/ads error: ', error);
+        }
+    },
     // ads: async (parent, args) => {
     //     try {
     //         return await Advert.find().limit(100);

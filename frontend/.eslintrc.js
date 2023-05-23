@@ -7,7 +7,8 @@ module.exports = {
   rules: {
     'vue/multi-word-component-names': ['error', {
       ignores: ['index', 'default', 'admin', 'login']
-    }]
+    }],
+    'import/no-named-as-default': 0
     // '@typescript-eslint/ban-ts-ignore': 'off'
   }
 }

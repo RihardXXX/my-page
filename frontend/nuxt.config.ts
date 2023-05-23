@@ -1,6 +1,6 @@
 // @ts-ignore
-import { defineNuxtConfig } from 'nuxt/config';
-import { api_client, api_ssr } from './config';
+import { defineNuxtConfig } from 'nuxt/config'
+import { apiClient, apiSsr } from './config'
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
@@ -27,8 +27,9 @@ export default defineNuxtConfig({
     // proxyCookies: true,
     clients: {
       default: {
-        httpEndpoint: process.env.API_SSR, // useQuery endpoint
-        browserHttpEndpoint: process.env.API_CLIENT, // useMutation endpoint
+        // @ts-ignore
+        httpEndpoint: apiSsr, // useQuery endpoint
+        browserHttpEndpoint: apiClient, // useMutation endpoint
         // wsEndpoint: '',
         httpLinkOptions: {},
         wsLinkOptions: {},
@@ -40,7 +41,7 @@ export default defineNuxtConfig({
         tokenStorage: 'cookie',
         authType: 'Bearer',
         authHeader: 'Authorization'
-      },
+      }
     }
   },
   vite: {
