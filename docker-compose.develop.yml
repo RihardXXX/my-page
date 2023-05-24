@@ -27,6 +27,7 @@ services:
       - ./frontend/utils:/usr/src/app/utils
       - ./frontend/apollo:/usr/src/app/apollo
       - ./frontend/plugins:/usr/src/app/plugins
+      - ./frontend/interfaces:/usr/src/app/interfaces
 #      - ./frontend/static:/usr/src/app/static
   api:
     command: npm run dev

@@ -16,3 +16,14 @@ export const DELETE_NAV_ITEM = gql`
     deleteNavItem(id: $deleteNavItemId)
   }
 `
+
+export const UPDATE_NAV_ITEM = gql`
+  mutation UpdateNavItem($updateNavItemId: ID!, $fields: NavItemField) {
+    updateNavItem(id: $updateNavItemId, fields: $fields) {
+      _id
+      nameSection
+      nameSection
+      type
+    }
+  }
+`

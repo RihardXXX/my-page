@@ -55,6 +55,21 @@ const Mutation = {
             return false;
         }
     },
+
+    updateNavItem: async (parent, { id, fields }) => {
+        // проверка авторизации и пошло поехало
+        // Находим элемент меню
+        const navItem = await NavItem.findById(id);
+
+        // если не находим элемент меню
+        errorField('такого элемента меню не существует', navItem);
+
+        try {
+            return await NavItem.findOneAndUpdate({ _id: id }, { $set: fields }, { new: true });
+        } catch (error) {
+            console.log('Mutation/updateNavItem error: ', error);
+        }
+    }
     // newAdvert: async (parent, { name, content, category, contact }, { idUser }) => {
     //
     //     errorAuth(idUser);

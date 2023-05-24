@@ -104,79 +104,27 @@
       </el-table>
     </el-card>
     <client-only>
-      <el-dialog v-model="dialogEditMenuItem" title="Shipping address">
-        <el-form
-          ref="formEditItem"
-          label-position="top"
-          :model="formEditNavItem"
-          class="demo-ruleForm"
-        >
-          <el-form-item
-            label="Выберите тип меню"
-            prop="type"
-            :rules="[ {
-              required: true,
-              message: 'пожалуйста выберите тип создаваемого элемента меню',
-              trigger: 'change',
-            },]"
-          >
-            <el-select v-model="formEditNavItem.type" placeholder="Выберите тип меню" :style="{width: '100%'}">
-              <el-option label="меню со скроллом к секции" value="eventName" />
-              <el-option label="меню переход на другую страницу в приложении" value="pageItem" />
-              <el-option label="меню ссылка на сторонний ресурс" value="absolutLink" />
-            </el-select>
-          </el-form-item>
-          <el-form-item
-            label="название меню"
-            prop="name"
-            :rules="[
-              { required: true, message: 'поле обязательно для заполнения' },
-              { type: 'string', message: 'заполните поле строкой' },
-            ]"
-          >
-            <el-input
-              v-model.number="formEditNavItem.name"
-              type="text"
-              autocomplete="off"
-            />
-          </el-form-item>
-          <el-form-item
-            :label="helpTextEdit"
-            prop="nameSection"
-            :rules="[
-              { required: true, message: 'поле обязательно для заполнения' },
-              { type: 'string', message: 'заполните поле строкой' },
-            ]"
-          >
-            <el-input
-              v-model.number="formEditNavItem.nameSection"
-              type="text"
-              autocomplete="off"
-            />
-          </el-form-item>
-        </el-form>
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="dialogEditMenuItem = false">
-              отмена
-            </el-button>
-            <el-button type="primary" @click="editMenuItemSave(formEditItem)">
-              сохранить изменения
-            </el-button>
-          </span>
-        </template>
-      </el-dialog>
+      <ModalEditNavItem
+        :is-show-modal="isShowModal"
+        :open-close="openClose"
+        :update-item="updateItem"
+        :type="propsModalEdit.type"
+        :name="propsModalEdit.type"
+        :name-section="propsModalEdit.nameSection"
+      />
     </client-only>
   </section>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, computed } from 'vue';
-import type { FormInstance } from 'element-plus';
-import { useMutation, useQuery } from '@vue/apollo-composable';
-// import { MenuItem } from '~/components/layouts/AppHeader.vue';
-import { CREATE_NAV_ITEM, DELETE_NAV_ITEM } from '~/apollo/mutation';
-import { GET_MENU_HEADER } from '~/apollo/query';
+import { reactive, ref, computed } from 'vue'
+import type { FormInstance } from 'element-plus'
+import { useMutation, useQuery } from '@vue/apollo-composable'
+import ModalEditNavItem, { PropsModalEditNavItem } from '~/components/admin/ModalEditNavItem.vue'
+import { CREATE_NAV_ITEM, DELETE_NAV_ITEM } from '~/apollo/mutation'
+import { GET_MENU_HEADER } from '~/apollo/query'
+import { INavItemValidForm } from '~/interfaces'
+import { generateHelpText } from '~/utils'
 
 const svg = `
         <path class="path" d="
@@ -206,16 +154,10 @@ const menuNavigationHeader = computed<INavItem[] | []>(() => {
 })
 // =============
 
-interface IValidForm {
-  type: string | '',
-  name: string| '',
-  nameSection: string | ''
-}
-
 // форма для валидации ref for create item
 const formCreateItem = ref<FormInstance>()
 // данные для отправки на сервер
-const menuValidateForm: IValidForm = reactive({
+const menuValidateForm: INavItemValidForm = reactive({
   type: '',
   name: '',
   nameSection: ''
@@ -251,19 +193,6 @@ const resetForm = (formEl: FormInstance | undefined) => {
   formEl.resetFields()
 }
 
-const generateHelpText = (typeItem: string | ''): string => {
-  switch (typeItem) {
-    case 'eventName':
-      return 'сюда пишем название секции куда будем скролить на английском'
-    case 'pageItem':
-      return 'сюда пишем название страницы куда будем переходить'
-    case 'absolutLink':
-      return 'сюда пишем абсолютную ссылку для перезода на сторонную страницу'
-    default:
-      return 'сюда пишем название секции куда будем скролить на английском'
-  }
-}
-
 // подсказка для лейбла инпута при создании
 const helpTextCreate = computed<string>(() => {
   return generateHelpText(menuValidateForm.type)
@@ -279,14 +208,17 @@ const deleteMenuItem = (row: INavItem) => {
   })
 }
 
+const isShowModal = ref(false)
+const updateItem = ():void => {
+  refetch()
+}
+
+const openClose = ():void => {
+  isShowModal.value = !isShowModal.value
+}
+
 // модалка для редактирования элементов меню
-const dialogEditMenuItem = ref(false)
-
-// форма для валидации ref for create item
-const formEditItem = ref<FormInstance>()
-
-// данные для редактирования в модалке
-const formEditNavItem: IValidForm = reactive({
+const propsModalEdit = ref<PropsModalEditNavItem>({
   type: '',
   name: '',
   nameSection: ''
@@ -294,34 +226,11 @@ const formEditNavItem: IValidForm = reactive({
 
 // edit nav
 const editMenuDialogShow = (row: INavItem):void => {
-  console.log(row)
-  dialogEditMenuItem.value = true
-  formEditNavItem.name = row.name
-  formEditNavItem.nameSection = row.nameSection
-  formEditNavItem.type = row.type
+  openClose()
+  propsModalEdit.value.type = row.type
+  propsModalEdit.value.name = row.name
+  propsModalEdit.value.nameSection = row.nameSection
 }
-
-// отправка на сервер чтобы внедрить изменения по меню
-const editMenuItemSave = async (formEl: FormInstance | undefined):Promise<void> => {
-  console.log('editMenuItemSave')
-  if (!formEl) { return }
-  formEl.validate((valid) => {
-    if (valid) {
-      console.log('submit!')
-      console.log('formEditNavItem: ', formEditNavItem)
-      // после отправки на сервер закрываем окно
-      dialogEditMenuItem.value = false
-    } else {
-      console.log('error submit!');
-      return false;
-    }
-  })
-}
-
-// подсказка для лейбла инпута при редактировании в модалке
-const helpTextEdit = computed<string>(() => {
-  return generateHelpText(formEditNavItem.type)
-})
 
 </script>
 

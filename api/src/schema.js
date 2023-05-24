@@ -82,6 +82,11 @@ const typeDefs = gql`
 #        content: String
 #        contact: String
 #    },
+    input NavItemField {
+        name: String
+        nameSection: String
+        type: String
+    }
     type Query {
         test: Xxx!
         getMenuHeader: [NavItem]!
@@ -100,6 +105,7 @@ const typeDefs = gql`
     type Mutation {
         createNavItem(name: String!, nameSection: String!, type: String!): NavItem!
         deleteNavItem(id: ID!): Boolean
+        updateNavItem(id: ID!, fields: NavItemField): NavItem!
 #        newAdvert(name: String!, content: String!, category: [String!]!, contact: String): Advert!
 #        updateAdvert(id: ID!, fields: Advertfield): Advert!
         test(id: String!): String!
