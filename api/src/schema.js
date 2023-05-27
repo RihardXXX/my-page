@@ -106,6 +106,7 @@ const typeDefs = gql`
         createNavItem(name: String!, nameSection: String!, type: String!): NavItem!
         deleteNavItem(id: ID!): Boolean
         updateNavItem(id: ID!, fields: NavItemField): NavItem!
+        deleteAllNavItem: Boolean
 #        newAdvert(name: String!, content: String!, category: [String!]!, contact: String): Advert!
 #        updateAdvert(id: ID!, fields: Advertfield): Advert!
         test(id: String!): String!

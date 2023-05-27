@@ -1,5 +1,7 @@
 import gql from 'graphql-tag'
 
+// Внимание в variables указываем имена с долларом которые но без доллара
+
 export const CREATE_NAV_ITEM = gql`
   mutation CreateNavItem($name: String!, $nameSection: String!, $type: String!) {
     createNavItem(name: $name, nameSection: $nameSection, type: $type) {
@@ -25,5 +27,11 @@ export const UPDATE_NAV_ITEM = gql`
       nameSection
       type
     }
+  }
+`
+
+export const DELETE_ALL_NAV_ITEM = gql`
+  mutation Mutation {
+    deleteAllNavItem
   }
 `

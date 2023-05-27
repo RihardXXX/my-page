@@ -72,8 +72,9 @@ import { UPDATE_NAV_ITEM } from '~/apollo/mutation'
 
 export interface PropsModalEditNavItem {
   openClose: () => void,
-  updateItem: () => void,
+  refetchItemLIst: () => void,
   isShowModal: boolean,
+  id?: string,
   type?: string,
   name?: string,
   nameSection?: string,
@@ -81,14 +82,13 @@ export interface PropsModalEditNavItem {
 
 const props = withDefaults(defineProps<PropsModalEditNavItem>(), {
   isShowModal: false,
+  id: '',
   type: '',
   name: '',
   nameSection: ''
 })
 
-const { isShowModal, type, name, nameSection, openClose, updateItem } = toRefs(props)
-
-console.log('name: 1123', name.value)
+const { isShowModal, type, name, nameSection, openClose, refetchItemLIst, id } = toRefs(props)
 
 // форма для валидации ref for create item
 const formEditItem = ref<FormInstance>()
@@ -114,17 +114,36 @@ watch((): boolean => isShowModal.value, ():void => {
   formEditNavItem.nameSection = nameSection.value
 })
 
+// изменение элементов меню
+const { mutate: updateNavItem, onDone: onDoneUpdate, onError: onErrorUpdate } = useMutation(UPDATE_NAV_ITEM)
+
 // отправка на сервер чтобы внедрить изменения по меню
 const editMenuItemSave = async (formEl: FormInstance | undefined):Promise<void> => {
   console.log('editMenuItemSave')
   if (!formEl) { return }
   await formEl.validate((valid) => {
     if (valid) {
-      console.log('submit!')
-      console.log('formEditNavItem: ', formEditNavItem)
+      // console.log('submit!')
+      // console.log('formEditNavItem: ', formEditNavItem)
+      // console.log('id: ', id.value)
       // после отправки на сервер закрываем окно
-      updateItem.value()
-      openClose.value()
+      updateNavItem({
+        updateNavItemId: id.value,
+        fields: {
+          type: formEditNavItem.type,
+          name: formEditNavItem.name,
+          nameSection: formEditNavItem.nameSection
+        }
+      })
+      //
+      onDoneUpdate(() => {
+        refetchItemLIst.value()
+        openClose.value()
+      })
+
+      onErrorUpdate((error) => {
+        console.log('error onErrorUpdate/editMenuItemSave', error)
+      })
     } else {
       console.log('error submit!')
       return false

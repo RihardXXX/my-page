@@ -15,16 +15,24 @@
       </div>
       <nav :class="$style.nav">
         <ul
-          v-show="Boolean(menu.length)"
+          v-show="Boolean(menuNavigationHeader.length)"
           :class="$style.navList"
         >
+
           <li
-            v-for="menuItem in menu"
-            :key="`header${menuItem.id}`"
+            v-for="menuItem in menuNavigationHeader"
+            :key="`header${menuItem._id}`"
             :class="$style.navItem"
-            @click="() => selectSection(menuItem)"
           >
-            {{ menuItem.name }}
+            <div v-if="menuItem.type === 'eventName'">
+              {{ menuItem.name }}
+            </div>
+            <nuxt-link v-else-if="menuItem.type === 'pageItem'" :to="menuItem.nameSection">
+              {{ menuItem.name }}
+            </nuxt-link>
+            <a v-else-if="menuItem.type === 'absolutLink'" :href="menuItem.nameSection" target="_blank">
+              {{ menuItem.name }}
+            </a>
           </li>
         </ul>
       </nav>
@@ -33,9 +41,11 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
-// import { useQuery } from '@vue/apollo-composable';
+import { onMounted, ref, computed } from 'vue'
+import { GET_MENU_HEADER } from "~/apollo/query";
+import { useQuery } from '@vue/apollo-composable';
 import emitter from '~/utils/emitter'
+import { INavItem } from "~/interfaces";
 // import Dot, { size, color, IPosition } from '@/components/Dot.vue';
 // import { intersectionObserver } from '@/assets/utils';
 
@@ -48,8 +58,13 @@ import emitter from '~/utils/emitter'
 
 // const { data } = await useAsyncQuery(TEST)
 
-// const { result } = useQuery(TEST)
-// @ts-ignore
+const { result: dataMenu, loading: isLoadingMenu, error, refetch: refetchMenu } = useQuery(GET_MENU_HEADER)
+
+const menuNavigationHeader = computed<[] | INavItem[]>(() => {
+  const menu = dataMenu.value.getMenuHeader
+
+  return menu.length ? menu : []
+})
 
 let idx = 1
 
@@ -228,6 +243,15 @@ onMounted(():void => {
         margin-left: 4rem;
         transition: all 0.5s;
         cursor: pointer;
+
+        div {
+          width: 100%;
+        }
+
+        a {
+          display: block;
+          width: 100%;
+        }
 
         &:first-child {
           margin-left: 0;

@@ -69,6 +69,18 @@ const Mutation = {
         } catch (error) {
             console.log('Mutation/updateNavItem error: ', error);
         }
+    },
+
+    deleteAllNavItem: async (parent) => {
+        // проверка авторизации и потом только удаление
+
+        try {
+            await NavItem.deleteMany({});
+            return true;
+        } catch (e) {
+            console.log('Mutation/deleteAllNavItem error: ', e);
+            return false;
+        }
     }
     // newAdvert: async (parent, { name, content, category, contact }, { idUser }) => {
     //

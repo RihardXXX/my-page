@@ -8,6 +8,7 @@
     </ul>
     <el-card class="box-card">
       <h5>Создание элемента меню</h5>
+
       <el-form
         ref="formCreateItem"
         label-position="top"
@@ -68,6 +69,26 @@
           </el-button>
         </el-form-item>
       </el-form>
+
+      <div :class="$style.managedList">
+        <el-button type="success" plain @click="refetch()">
+          Обновить список
+        </el-button>
+        <el-popconfirm
+          confirm-button-text="да"
+          cancel-button-text="нет"
+          title="Вы действительно хотите удалить все элементы списка меню хедара"
+          width="400"
+          @confirm="deleteAllNavItem()"
+        >
+          <template #reference>
+            <el-button type="danger" plain>
+              Удалить все элементы
+            </el-button>
+          </template>
+        </el-popconfirm>
+      </div>
+
       <el-table
         v-loading="isLoadingCreatNavItem || isLoadingMenuHeader || isLoadingDeleteNavItem"
         :data="menuNavigationHeader"
@@ -103,13 +124,15 @@
         </el-table-column>
       </el-table>
     </el-card>
+
     <client-only>
       <ModalEditNavItem
+        :id="propsModalEdit.id"
         :is-show-modal="isShowModal"
         :open-close="openClose"
-        :update-item="updateItem"
+        :refetch-item-l-ist="refetchItemLIst"
         :type="propsModalEdit.type"
-        :name="propsModalEdit.type"
+        :name="propsModalEdit.name"
         :name-section="propsModalEdit.nameSection"
       />
     </client-only>
@@ -120,11 +143,13 @@
 import { reactive, ref, computed } from 'vue'
 import type { FormInstance } from 'element-plus'
 import { useMutation, useQuery } from '@vue/apollo-composable'
+import { ElNotification } from 'element-plus'
 import ModalEditNavItem, { PropsModalEditNavItem } from '~/components/admin/ModalEditNavItem.vue'
-import { CREATE_NAV_ITEM, DELETE_NAV_ITEM } from '~/apollo/mutation'
+import { CREATE_NAV_ITEM, DELETE_NAV_ITEM, DELETE_ALL_NAV_ITEM } from '~/apollo/mutation'
 import { GET_MENU_HEADER } from '~/apollo/query'
 import { INavItemValidForm } from '~/interfaces'
 import { generateHelpText } from '~/utils'
+import { INavItem } from "~/interfaces";
 
 const svg = `
         <path class="path" d="
@@ -138,19 +163,15 @@ const svg = `
       `
 
 // ============== Получение меню навигации для Хедара
-interface INavItem {
-  __typename: string,
-  name: string,
-  nameSection: string,
-  type: string,
-  _id: string
-}
+
 
 // инициализация элементов меню
 const { result: menuHeaderList, loading: isLoadingMenuHeader, refetch } = useQuery(GET_MENU_HEADER)
 
 const menuNavigationHeader = computed<INavItem[] | []>(() => {
-  return menuHeaderList.value.getMenuHeader
+  const menu = menuHeaderList.value.getMenuHeader
+
+  return menu.length ? menu : []
 })
 // =============
 
@@ -176,7 +197,11 @@ const submitForm = (formEl: FormInstance | undefined) => {
         type: menuValidateForm.type
       })
       onDoneCreate(() => {
-        // обновление состояния меню и стирание инпутов
+        ElNotification({
+          title: 'Внимание',
+          message: `создан элемент меню ${menuValidateForm.name}`,
+          type: 'info'
+        })
         refetch()
         formEl.resetFields()
       })
@@ -205,11 +230,16 @@ const deleteMenuItem = (row: INavItem) => {
   })
   onDoneDelete(() => {
     refetch()
+    ElNotification({
+      title: 'Внимание',
+      message: `удален элемент меню ${row.name}`,
+      type: 'info'
+    })
   })
 }
 
 const isShowModal = ref(false)
-const updateItem = ():void => {
+const refetchItemLIst = ():void => {
   refetch()
 }
 
@@ -219,6 +249,7 @@ const openClose = ():void => {
 
 // модалка для редактирования элементов меню
 const propsModalEdit = ref<PropsModalEditNavItem>({
+  id: '',
   type: '',
   name: '',
   nameSection: ''
@@ -227,9 +258,30 @@ const propsModalEdit = ref<PropsModalEditNavItem>({
 // edit nav
 const editMenuDialogShow = (row: INavItem):void => {
   openClose()
+  propsModalEdit.value.id = row._id
   propsModalEdit.value.type = row.type
   propsModalEdit.value.name = row.name
   propsModalEdit.value.nameSection = row.nameSection
+}
+
+const { mutate: deleteAllNav, onDone: onDoneAllNavItem, onError: onErrorNavItem } = useMutation(DELETE_ALL_NAV_ITEM)
+
+// удаление всех элементов списка меню
+const deleteAllNavItem = ():void => {
+  deleteAllNav()
+
+  onDoneAllNavItem(():void => {
+    refetch()
+    ElNotification({
+      title: 'Внимание',
+      message: 'Все элементы меню хедара удалены',
+      type: 'info'
+    })
+  })
+
+  onErrorNavItem((e):void => {
+    console.log('error deleteAllNavItem: ', e)
+  })
 }
 
 </script>
@@ -237,5 +289,11 @@ const editMenuDialogShow = (row: INavItem):void => {
 <style lang="scss" module>
 .help {
   margin: 2rem 0;
+}
+
+.managedList {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
