@@ -18,7 +18,6 @@
           v-show="Boolean(menuNavigationHeader.length)"
           :class="$style.navList"
         >
-
           <li
             v-for="menuItem in menuNavigationHeader"
             :key="`header${menuItem._id}`"
@@ -42,10 +41,10 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, computed } from 'vue'
-import { GET_MENU_HEADER } from "~/apollo/query";
-import { useQuery } from '@vue/apollo-composable';
+import { useQuery } from '@vue/apollo-composable'
+import { GET_MENU_HEADER } from '~/apollo/query'
 import emitter from '~/utils/emitter'
-import { INavItem } from "~/interfaces";
+import { INavItem } from '~/interfaces'
 // import Dot, { size, color, IPosition } from '@/components/Dot.vue';
 // import { intersectionObserver } from '@/assets/utils';
 
@@ -58,7 +57,7 @@ import { INavItem } from "~/interfaces";
 
 // const { data } = await useAsyncQuery(TEST)
 
-const { result: dataMenu, loading: isLoadingMenu, error, refetch: refetchMenu } = useQuery(GET_MENU_HEADER)
+const { result: dataMenu } = useQuery(GET_MENU_HEADER)
 
 const menuNavigationHeader = computed<[] | INavItem[]>(() => {
   const menu = dataMenu.value.getMenuHeader
@@ -235,6 +234,8 @@ onMounted(():void => {
       display: flex;
       justify-content: flex-end;
       align-items: center;
+      height: 8rem;
+      flex-wrap: wrap;
 
       .navItem {
         font-weight: 500;

@@ -10,3 +10,11 @@ export interface INavItem {
   type: string,
   _id: string
 }
+
+export interface ICardValidForm {
+  type: 'cardAboutMe' | '',
+  title: string | '',
+  welcome: string | '',
+  description: string | '',
+  buttonName: string | '',
+}

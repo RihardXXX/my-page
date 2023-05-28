@@ -4,7 +4,7 @@
       <AdminHeader />
     </el-tab-pane>
     <el-tab-pane label="aboutMe">
-      Обо мне
+      <AdminAboutMe />
     </el-tab-pane>
     <el-tab-pane label="skills">
       Навыки
@@ -29,6 +29,7 @@
 
 <script setup>
 import AdminHeader from '~/components/admin/AdminHeader.vue'
+import AdminAboutMe from '~/components/admin/AdminAboutMe.vue'
 // This will work in both `<script setup>` and `<script>`
 definePageMeta({
   layout: 'admin'

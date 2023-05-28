@@ -24,11 +24,13 @@
             trigger: 'change',
           },]"
         >
-          <el-select v-model="menuValidateForm.type" :disabled="isLoadingCreatNavItem" placeholder="Выберите тип меню" :style="{width: '100%'}">
-            <el-option label="меню со скроллом к секции" value="eventName" />
-            <el-option label="меню переход на другую страницу в приложении" value="pageItem" />
-            <el-option label="меню ссылка на сторонний ресурс" value="absolutLink" />
-          </el-select>
+          <client-only>
+            <el-select v-model="menuValidateForm.type" :disabled="isLoadingCreatNavItem" placeholder="Выберите тип меню" :style="{width: '100%'}">
+              <el-option label="меню со скроллом к секции" value="eventName" />
+              <el-option label="меню переход на другую страницу в приложении" value="pageItem" />
+              <el-option label="меню ссылка на сторонний ресурс" value="absolutLink" />
+            </el-select>
+          </client-only>
         </el-form-item>
         <el-form-item
           label="название меню"
@@ -147,9 +149,8 @@ import { ElNotification } from 'element-plus'
 import ModalEditNavItem, { PropsModalEditNavItem } from '~/components/admin/ModalEditNavItem.vue'
 import { CREATE_NAV_ITEM, DELETE_NAV_ITEM, DELETE_ALL_NAV_ITEM } from '~/apollo/mutation'
 import { GET_MENU_HEADER } from '~/apollo/query'
-import { INavItemValidForm } from '~/interfaces'
+import { INavItemValidForm, INavItem } from '~/interfaces'
 import { generateHelpText } from '~/utils'
-import { INavItem } from "~/interfaces";
 
 const svg = `
         <path class="path" d="
@@ -163,7 +164,6 @@ const svg = `
       `
 
 // ============== Получение меню навигации для Хедара
-
 
 // инициализация элементов меню
 const { result: menuHeaderList, loading: isLoadingMenuHeader, refetch } = useQuery(GET_MENU_HEADER)
