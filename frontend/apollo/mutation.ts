@@ -35,3 +35,15 @@ export const DELETE_ALL_NAV_ITEM = gql`
     deleteAllNavItem
   }
 `
+
+export const CREATE_CARD_FOR_SECTION = gql`
+  mutation CreateCardForSection($fields: CardForSectionField) {
+    createCardForSection(fields: $fields) {
+      type
+      welcome
+      title
+      description
+      buttonName
+    }
+  }
+`

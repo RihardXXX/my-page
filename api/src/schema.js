@@ -14,6 +14,16 @@ const typeDefs = gql`
         createdAt: DateTime!
         updatedAt: DateTime!
     },
+    type CardForSection {
+        _id: ID!
+        type: String!
+        title: String!
+        welcome: String!
+        buttonName: String!
+        description: String!
+        createdAt: DateTime!
+        updatedAt: DateTime!
+    },
 #    type User {
 #        id: ID!
 #        username: String!
@@ -87,9 +97,17 @@ const typeDefs = gql`
         nameSection: String
         type: String
     }
+    input CardForSectionField {
+        type: String!
+        title: String!
+        welcome: String!
+        buttonName: String!
+        description: String!
+    }
     type Query {
         test: Xxx!
         getMenuHeader: [NavItem]!
+        getCardAboutMe: [CardForSection]!
 #        advert(id: String!): Advert!
 #        advertFeed(offset: Int!, limit: Int!): AdvertFeed
 #        advertFeedFavorite(offset: Int!, limit: Int!): AdvertFeed
@@ -107,6 +125,7 @@ const typeDefs = gql`
         deleteNavItem(id: ID!): Boolean
         updateNavItem(id: ID!, fields: NavItemField): NavItem!
         deleteAllNavItem: Boolean
+        createCardForSection(fields: CardForSectionField): CardForSection!
 #        newAdvert(name: String!, content: String!, category: [String!]!, contact: String): Advert!
 #        updateAdvert(id: ID!, fields: Advertfield): Advert!
         test(id: String!): String!

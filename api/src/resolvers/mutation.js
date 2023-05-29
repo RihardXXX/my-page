@@ -1,4 +1,4 @@
-const { NavItem } = require('../models');
+const { NavItem, CardForSection } = require('../models');
 // const bcrypt = require('bcrypt');
 // const jwt = require('jsonwebtoken');
 // const { gravatar } = require('../util/gravatar');
@@ -81,7 +81,33 @@ const Mutation = {
             console.log('Mutation/deleteAllNavItem error: ', e);
             return false;
         }
-    }
+    },
+
+    createCardForSection: async (parent, { fields }) => {
+        // проверка авторизации, а потом создание
+
+        const { type, welcome, title, description, buttonName } = fields;
+
+        errorField('не все поля заполнены для создания элемента навигации хедара',
+            type, welcome, title, description, buttonName);
+
+        try {
+            const cardForSection = await CardForSection.create({
+                type,
+                welcome,
+                title,
+                description,
+                buttonName
+            });
+
+            await cardForSection.save();
+
+            return cardForSection;
+        } catch (e) {
+            console.log('Mutation/createNavItem error: ', e);
+            return false;
+        }
+    },
     // newAdvert: async (parent, { name, content, category, contact }, { idUser }) => {
     //
     //     errorAuth(idUser);

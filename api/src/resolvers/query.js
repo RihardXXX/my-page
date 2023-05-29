@@ -1,6 +1,6 @@
 // const { Advert, User, Comment } = require('../models');
 const { GraphQLError } = require('graphql');
-const { NavItem } = require('../models');
+const { NavItem, CardForSection } = require('../models');
 // const { errorAuth, errorField, errorNotItem, error403, isEmptyObject, getUser } = require('../util/utils');
 // const nodemailer = require("nodemailer");
 
@@ -13,12 +13,20 @@ const Query = {
 
     getMenuHeader: async () => {
         try {
-            // проверка авторизации
             return await NavItem.find().limit(100);
         } catch (error) {
-            console.log('Query/ads error: ', error);
+            console.log('Query/getMenuHeader error: ', error);
         }
     },
+
+    getCardAboutMe: async () => {
+        try {
+            const result = await CardForSection.find({ type: 'cardAboutMe' }).exec();
+            return result;
+        } catch (error) {
+            console.log('Query/getMenuHeader error: ', error);
+        }
+    }
     // ads: async (parent, args) => {
     //     try {
     //         return await Advert.find().limit(100);

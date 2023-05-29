@@ -1,7 +1,9 @@
 const NavItem = require('./NavItem');
+const CardForSection = require('./CardForSection')
 
 const models = {
-    NavItem
+    NavItem,
+    CardForSection
 }
 
 module.exports = models;

@@ -25,7 +25,7 @@
           },]"
         >
           <client-only>
-            <el-select :key="122" v-model="cardValidateForm.type" :disabled="isLoadingCreatCard" placeholder="Выберите тип карточки" :style="{width: '100%'}">
+            <el-select :key="122" v-model="cardValidateForm.type" :disabled="isLoadingCreateCard" placeholder="Выберите тип карточки" :style="{width: '100%'}">
               <el-option :key="122" label="карточка для секции обо мне" value="cardAboutMe" />
             </el-select>
           </client-only>
@@ -42,7 +42,7 @@
             v-model.trim="cardValidateForm.welcome"
             type="text"
             autocomplete="off"
-            :disabled="isLoadingCreatCard"
+            :disabled="isLoadingCreateCard"
           />
         </el-form-item>
         <el-form-item
@@ -57,7 +57,7 @@
             v-model.trim="cardValidateForm.title"
             type="text"
             autocomplete="off"
-            :disabled="isLoadingCreatCard"
+            :disabled="isLoadingCreateCard"
           />
         </el-form-item>
         <el-form-item
@@ -74,7 +74,7 @@
             placeholder="описание карточки"
             show-word-limit
             type="textarea"
-            :disabled="isLoadingCreatCard"
+            :disabled="isLoadingCreateCard"
           />
         </el-form-item>
         <el-form-item
@@ -89,18 +89,34 @@
             v-model.trim="cardValidateForm.buttonName"
             type="text"
             autocomplete="off"
-            :disabled="isLoadingCreatCard"
+            :disabled="isLoadingCreateCard"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm(formCreateCard)">
+          <el-button type="primary" :disabled="isLoadingCreateCard" @click="submitForm(formCreateCard)">
             создать
           </el-button>
-          <el-button @click="resetForm(formCreateCard)">
+          <el-button :disabled="isLoadingCreateCard" @click="resetForm(formCreateCard)">
             сбросить
           </el-button>
         </el-form-item>
       </el-form>
+    </el-card>
+
+    <el-card class="box-card">
+      <template #header>
+        <div class="card-header">
+          <h6>Карточка созданная для секции обо мне</h6>
+          <br>
+          <el-button class="button" type="warning">
+            редактировать карточку
+          </el-button>
+        </div>
+      </template>
+      <div v-for="o in 4" :key="o" class="text item">
+        {{ 'List item ' + o }}
+      </div>
+      content
     </el-card>
   </section>
 </template>
@@ -109,7 +125,10 @@
 import { reactive, ref, computed } from 'vue'
 import type { FormInstance } from 'element-plus'
 import { ElNotification } from 'element-plus'
+import { useMutation, useQuery } from '@vue/apollo-composable'
 import { ICardValidForm } from '~/interfaces'
+import { CREATE_CARD_FOR_SECTION } from '~/apollo/mutation'
+import { GET_CARD_ABOUT_ME } from '~/apollo/query'
 
 // форма для валидации ref for create item
 const formCreateCard = ref<FormInstance>()
@@ -122,17 +141,30 @@ const cardValidateForm: ICardValidForm = reactive({
   description: ''
 })
 
-const isLoadingCreatCard = ref<boolean>(false)
+const { mutate: createCardForSection, loading: isLoadingCreateCard, onDone: onDoneCreateCard } = useMutation(CREATE_CARD_FOR_SECTION)
 
 const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) { return }
   formEl.validate((valid) => {
     if (valid) {
-      // createNavItem({
-      //   name: menuValidateForm.name,
-      //   nameSection: menuValidateForm.nameSection,
-      //   type: menuValidateForm.type
-      // })
+      createCardForSection({
+        fields: {
+          type: cardValidateForm.type,
+          welcome: cardValidateForm.welcome,
+          title: cardValidateForm.title,
+          description: cardValidateForm.description,
+          buttonName: cardValidateForm.buttonName
+        } as ICardValidForm
+      })
+
+      onDoneCreateCard(() => {
+        ElNotification({
+          title: 'Внимание',
+          message: 'создана карточка для секции обо мне',
+          type: 'info'
+        })
+        formEl.resetFields()
+      })
       // onDoneCreate(() => {
       //   ElNotification({
       //     title: 'Внимание',
@@ -142,7 +174,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
       //   refetch()
       //   formEl.resetFields()
       // })
-      console.log('form: ', formEl)
     } else {
       console.log('error submit!')
       return false
@@ -155,6 +186,8 @@ const resetForm = (formEl: FormInstance | undefined) => {
   if (!formEl) { return }
   formEl.resetFields()
 }
+
+const { result: resultData, loading: isLoadingGetCard, refetch: refetchCardAboutMe } = useQuery(GET_CARD_ABOUT_ME)
 
 </script>
 

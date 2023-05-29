@@ -63,10 +63,10 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm(formCreateItem)">
+          <el-button type="primary" :disabled="isLoadingCreatNavItem" @click="submitForm(formCreateItem)">
             создать
           </el-button>
-          <el-button @click="resetForm(formCreateItem)">
+          <el-button :disabled="isLoadingCreatNavItem" @click="resetForm(formCreateItem)">
             сбросить
           </el-button>
         </el-form-item>
