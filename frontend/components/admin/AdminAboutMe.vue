@@ -14,6 +14,7 @@
         label-position="top"
         :model="cardValidateForm"
         class="demo-ruleForm"
+        :disabled="isCards"
       >
         <el-form-item
           label="Выберите тип карточки для секции обо мне"
@@ -107,17 +108,50 @@
       <template #header>
         <div class="card-header">
           <h6>Карточка созданная для секции обо мне</h6>
-          <br>
-          <el-button class="button" type="warning">
-            редактировать карточку
-          </el-button>
         </div>
       </template>
-      <div v-for="o in 4" :key="o" class="text item">
-        {{ 'List item ' + o }}
+
+      <div v-show="isCards" :class="$style.managedList">
+        <el-button class="button" type="warning" :disabled="isLoadingCreateCard || isLoadingGetCard || isLoadingDeleteCard" @click.prevent="editMenuDialogShow()">
+          редактировать карточку
+        </el-button>
+        <el-popconfirm
+          confirm-button-text="да"
+          cancel-button-text="нет"
+          title="Вы действительно хотите удалить карточку в секции обо мне"
+          width="400"
+          @confirm="deleteCardAboutMe()"
+        >
+          <template #reference>
+            <el-button type="danger" plain :disabled="isLoadingCreateCard || isLoadingGetCard || isLoadingDeleteCard">
+              удалить карточку обо мне
+            </el-button>
+          </template>
+        </el-popconfirm>
       </div>
-      content
+
+      <el-table v-if="isCards" :data="cardData" border style="width: 100%; margin-top: 1rem">
+        <el-table-column prop="key" label="место в карточке" width="300" />
+        <el-table-column prop="value" label="значение" />
+      </el-table>
+
+      <h6 v-else>
+        карточка отсутствует для секции обо мне
+      </h6>
     </el-card>
+
+    <client-only>
+      <ModalEditCardForSection
+        :id="propsModalEdit.id"
+        :is-show-modal="isShowModal"
+        :open-close="openClose"
+        :refetch-card-for-section="refetchCards"
+        :welcome="propsModalEdit.welcome"
+        :title="propsModalEdit.title"
+        :description="propsModalEdit.description"
+        :button-name="propsModalEdit.buttonName"
+      />
+    </client-only>
   </section>
 </template>
 
@@ -126,9 +160,10 @@ import { reactive, ref, computed } from 'vue'
 import type { FormInstance } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import { useMutation, useQuery } from '@vue/apollo-composable'
-import { ICardValidForm } from '~/interfaces'
-import { CREATE_CARD_FOR_SECTION } from '~/apollo/mutation'
+import { ICardBase, ICardValidForm } from '~/interfaces'
+import { CREATE_CARD_FOR_SECTION, DELETE_CARD_FOR_SECTION } from '~/apollo/mutation'
 import { GET_CARD_ABOUT_ME } from '~/apollo/query'
+import ModalEditCardForSection, { IEditCard } from '~/components/admin/ModalEditCardForSection.vue'
 
 // форма для валидации ref for create item
 const formCreateCard = ref<FormInstance>()
@@ -142,6 +177,7 @@ const cardValidateForm: ICardValidForm = reactive({
 })
 
 const { mutate: createCardForSection, loading: isLoadingCreateCard, onDone: onDoneCreateCard } = useMutation(CREATE_CARD_FOR_SECTION)
+const { mutate: deleteCardForSection, loading: isLoadingDeleteCard, onDone: onDoneDeleteCard } = useMutation(DELETE_CARD_FOR_SECTION)
 
 const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) { return }
@@ -163,17 +199,9 @@ const submitForm = (formEl: FormInstance | undefined) => {
           message: 'создана карточка для секции обо мне',
           type: 'info'
         })
+        refetchCardAboutMe()
         formEl.resetFields()
       })
-      // onDoneCreate(() => {
-      //   ElNotification({
-      //     title: 'Внимание',
-      //     message: `создан элемент меню ${menuValidateForm.name}`,
-      //     type: 'info'
-      //   })
-      //   refetch()
-      //   formEl.resetFields()
-      // })
     } else {
       console.log('error submit!')
       return false
@@ -188,6 +216,83 @@ const resetForm = (formEl: FormInstance | undefined) => {
 }
 
 const { result: resultData, loading: isLoadingGetCard, refetch: refetchCardAboutMe } = useQuery(GET_CARD_ABOUT_ME)
+
+const cardAboutMe = computed<ICardBase[] | []>(() => {
+  const cards = resultData.value.getCardAboutMe.filter((card: ICardBase) => card.type === 'cardAboutMe')
+
+  return cards.length ? cards : []
+})
+
+const isCards = computed<boolean>(() => {
+  return !!cardAboutMe?.value.length
+})
+
+const deleteCardAboutMe = (): void => {
+  const id = cardAboutMe.value[0]._id
+  console.log('delete card', id)
+  deleteCardForSection({
+    deleteCardForSectionId: id
+  })
+
+  onDoneDeleteCard(() => {
+    refetchCardAboutMe()
+  })
+}
+
+const cardData = computed<[] | object[]>(() => {
+  if (cardAboutMe.value.length) {
+    const card = cardAboutMe.value[0]
+    return [
+      {
+        key: 'приветствие сверху карточки',
+        value: card.welcome
+      },
+      {
+        key: 'заголовок',
+        value: card.title
+      },
+      {
+        key: 'описание в карточке',
+        value: card.description
+      },
+      {
+        key: 'текст кнопки',
+        value: card.buttonName
+      }
+    ]
+  }
+  return []
+})
+
+const isShowModal = ref(false)
+
+const openClose = ():void => {
+  isShowModal.value = !isShowModal.value
+}
+
+const refetchCards = ():void => {
+  refetchCardAboutMe()
+}
+
+// модалка для карточки
+const propsModalEdit = ref<IEditCard>({
+  id: '',
+  welcome: '',
+  title: '',
+  description: '',
+  buttonName: ''
+})
+
+// edit nav
+const editMenuDialogShow = ():void => {
+  const card = cardAboutMe.value[0]
+  propsModalEdit.value.id = card._id
+  propsModalEdit.value.title = card.title
+  propsModalEdit.value.description = card.description
+  propsModalEdit.value.welcome = card.welcome
+  propsModalEdit.value.buttonName = card.buttonName
+  openClose()
+}
 
 </script>
 

@@ -18,3 +18,15 @@ export interface ICardValidForm {
   description: string | '',
   buttonName: string | '',
 }
+
+export interface ICardBase {
+  buttonName: string
+  createdAt: string
+  updatedAt: string
+  description: string
+  title: string
+  type: 'cardAboutMe' | ''
+  welcome: string
+  __typename: 'CardForSection'
+  _id: string
+}

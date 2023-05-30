@@ -108,6 +108,19 @@ const Mutation = {
             return false;
         }
     },
+
+    deleteCardForSection: async (parent, { id }) => {
+        errorField('айди карточки обязателен для удаления карточки', id);
+
+        try {
+            await CardForSection.deleteOne({ _id: id });
+            return true;
+        } catch (e) {
+            console.log('Mutation/deleteCardForSection error: ', e);
+            return false;
+        }
+    },
+
     // newAdvert: async (parent, { name, content, category, contact }, { idUser }) => {
     //
     //     errorAuth(idUser);

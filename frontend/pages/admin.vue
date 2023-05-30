@@ -1,28 +1,36 @@
 <template>
   <el-tabs type="border-card" class="demo-tabs">
-    <el-tab-pane label="header">
-      <AdminHeader />
+    <el-tab-pane label="страница автора сайта">
+      <el-tabs type="border-card" class="demo-tabs">
+        <el-tab-pane label="хедар">
+          <AdminHeader />
+        </el-tab-pane>
+        <el-tab-pane label="обо мне">
+          <AdminAboutMe />
+        </el-tab-pane>
+        <el-tab-pane label="навыки">
+          Навыки
+        </el-tab-pane>
+        <el-tab-pane label="сертификаты">
+          Сертификаты
+        </el-tab-pane>
+        <el-tab-pane label="отзывы">
+          Отзывы
+        </el-tab-pane>
+        <el-tab-pane label="портфолио">
+          Портфолио
+        </el-tab-pane>
+        <el-tab-pane label="контакты">
+          Контакты
+        </el-tab-pane>
+        <el-tab-pane label="футер">
+          Футер
+        </el-tab-pane>
+      </el-tabs>
     </el-tab-pane>
-    <el-tab-pane label="aboutMe">
-      <AdminAboutMe />
-    </el-tab-pane>
-    <el-tab-pane label="skills">
-      Навыки
-    </el-tab-pane>
-    <el-tab-pane label="certificates">
-      Сертификаты
-    </el-tab-pane>
-    <el-tab-pane label="reviews">
-      Отзывы
-    </el-tab-pane>
-    <el-tab-pane label="portfolio">
-      Портфолио
-    </el-tab-pane>
-    <el-tab-pane label="contacts">
-      Контакты
-    </el-tab-pane>
-    <el-tab-pane label="footer">
-      Футер
+
+    <el-tab-pane label="сервис">
+      сервис
     </el-tab-pane>
   </el-tabs>
 </template>

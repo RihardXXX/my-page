@@ -47,3 +47,9 @@ export const CREATE_CARD_FOR_SECTION = gql`
     }
   }
 `
+
+export const DELETE_CARD_FOR_SECTION = gql`
+  mutation DeleteCardForSection($deleteCardForSectionId: ID!) {
+    deleteCardForSection(id: $deleteCardForSectionId)
+  }
+`
