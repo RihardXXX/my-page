@@ -127,6 +127,7 @@ const typeDefs = gql`
         deleteAllNavItem: Boolean
         createCardForSection(fields: CardForSectionField): CardForSection!
         deleteCardForSection(id: ID!): Boolean
+        updateCardForSection(id: ID!, fields: CardForSectionField): CardForSection!
 #        newAdvert(name: String!, content: String!, category: [String!]!, contact: String): Advert!
 #        updateAdvert(id: ID!, fields: Advertfield): Advert!
         test(id: String!): String!

@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="isShowModal" title="Редактирование элемента меню">
+  <el-dialog v-model="isShow" title="Редактирование элемента меню">
     <el-form
       ref="formEditCard"
       label-position="top"
@@ -68,7 +68,7 @@
         <el-button @click="openClose()">
           отмена
         </el-button>
-        <el-button type="primary" @click="editCardForSection(formEditCardValid)">
+        <el-button type="primary" @click="editCardForSection(formEditCard)">
           сохранить изменения
         </el-button>
       </span>
@@ -78,14 +78,8 @@
 <script lang="ts" setup>
 import { ref, withDefaults, toRefs, watch } from 'vue'
 import type { FormInstance } from 'element-plus'
-
-export interface IEditCard {
-  id: string,
-  title: string,
-  welcome: string,
-  buttonName: string,
-  description: string
-}
+import { useMutation } from '@vue/apollo-composable'
+import { UPDATE_CARD_FOR_SECTION } from '~/apollo/mutation'
 
 export interface PropsModalCardForSection {
   openClose: () => void,
@@ -96,10 +90,20 @@ export interface PropsModalCardForSection {
   welcome?: string,
   buttonName?: string,
   description?: string
+  type?: string
+}
+
+export interface IEditCard {
+  title: string,
+  welcome: string,
+  buttonName: string,
+  description: string
+  type?: string
+  id?: string
 }
 
 const props = withDefaults(defineProps<PropsModalCardForSection>(), {
-  isShowModal: false,
+  // isShowModal: false,
   id: '',
   title: '',
   welcome: '',
@@ -107,65 +111,59 @@ const props = withDefaults(defineProps<PropsModalCardForSection>(), {
   description: ''
 })
 
-const { isShowModal, id, title, welcome, openClose, refetchCardForSection, description, buttonName } = toRefs(props)
+const { isShowModal, id, title, welcome, openClose, refetchCardForSection, description, buttonName, type } = toRefs(props)
+
+const isShow = ref(false)
+
+watch(() => isShowModal.value, () => {
+  isShow.value = isShowModal.value
+})
 
 // форма для валидации ref for create item
 const formEditCard = ref<FormInstance>()
 
 // данные для редактирования в модалке
 const formEditCardValid: IEditCard = reactive({
-  id: '',
   title: '',
   welcome: '',
   buttonName: '',
   description: ''
 })
-//
-// // подсказка для лейбла инпута при редактировании в модалке
-// const helpTextEdit = computed<string>(() => {
-//   return generateHelpText(formEditNavItem.type)
-// })
-//
-// // инициализация формы из пропсов
-//
+
 watch((): boolean => isShowModal.value, ():void => {
   formEditCardValid.welcome = welcome.value
   formEditCardValid.title = title.value
   formEditCardValid.description = description.value
   formEditCardValid.buttonName = buttonName.value
 })
-//
-// // изменение элементов меню
-// const { mutate: updateNavItem, onDone: onDoneUpdate, onError: onErrorUpdate } = useMutation(UPDATE_NAV_ITEM)
-//
+
+const { mutate: updateCardSection, onDone: onDoneCard, onError: onErrorCard } = useMutation(UPDATE_CARD_FOR_SECTION)
+
 // отправка на сервер чтобы внедрить изменения по меню
 const editCardForSection = async (formEl: FormInstance | undefined):Promise<void> => {
-  console.log('editMenuItemSave')
   if (!formEl) { return }
   await formEl.validate((valid) => {
     if (valid) {
-      console.log('submit!')
-      console.log('form: ', formEl)
-      // console.log('formEditNavItem: ', formEditNavItem)
-      // console.log('id: ', id.value)
-      // после отправки на сервер закрываем окно
-      // updateNavItem({
-      //   updateNavItemId: id.value,
-      //   fields: {
-      //     type: formEditNavItem.type,
-      //     name: formEditNavItem.name,
-      //     nameSection: formEditNavItem.nameSection
-      //   }
-      // })
-      // //
-      // onDoneUpdate(() => {
-      //   refetchItemLIst.value()
-      //   openClose.value()
-      // })
-      //
-      // onErrorUpdate((error) => {
-      //   console.log('error onErrorUpdate/editMenuItemSave', error)
-      // })
+      updateCardSection({
+        updateCardForSectionId: id.value,
+        fields: {
+          title: formEditCardValid.title,
+          welcome: formEditCardValid.welcome,
+          buttonName: formEditCardValid.buttonName,
+          description: formEditCardValid.description,
+          type: type?.value
+        }
+      })
+
+      onDoneCard((data) => {
+        console.log(data)
+        refetchCardForSection.value()
+        openClose.value()
+      })
+
+      onErrorCard((e) => {
+        console.log('editCardForSection/error: ', e)
+      })
     } else {
       console.log('error submit!')
       return false

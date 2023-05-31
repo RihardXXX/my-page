@@ -53,3 +53,16 @@ export const DELETE_CARD_FOR_SECTION = gql`
     deleteCardForSection(id: $deleteCardForSectionId)
   }
 `
+
+export const UPDATE_CARD_FOR_SECTION = gql`
+  mutation UpdateCardForSection($updateCardForSectionId: ID!, $fields: CardForSectionField) {
+    updateCardForSection(id: $updateCardForSectionId, fields: $fields) {
+      _id
+      welcome
+      title
+      type
+      description
+      buttonName
+    }
+  }
+`

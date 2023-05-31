@@ -121,6 +121,19 @@ const Mutation = {
         }
     },
 
+    updateCardForSection: async (parent, { id, fields }) => {
+        const card = await CardForSection.findById(id);
+
+        // если не находим элемент меню
+        errorField('такого карточки секции не существует', card);
+
+        try {
+            return await CardForSection.findOneAndUpdate({ _id: id }, { $set: fields }, { new: true });
+        } catch (error) {
+            console.log('Mutation/updateCardForSection error: ', error);
+        }
+    }
+
     // newAdvert: async (parent, { name, content, category, contact }, { idUser }) => {
     //
     //     errorAuth(idUser);

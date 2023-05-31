@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="isShowModal" title="Редактирование элемента меню">
+  <el-dialog v-model="isShow" title="Редактирование элемента меню">
     <el-form
       ref="formEditItem"
       label-position="top"
@@ -89,6 +89,12 @@ const props = withDefaults(defineProps<PropsModalEditNavItem>(), {
 })
 
 const { isShowModal, type, name, nameSection, openClose, refetchItemLIst, id } = toRefs(props)
+
+const isShow = ref(false)
+
+watch(() => isShowModal.value, () => {
+  isShow.value = isShowModal.value
+})
 
 // форма для валидации ref for create item
 const formEditItem = ref<FormInstance>()

@@ -140,6 +140,31 @@
       </h6>
     </el-card>
 
+    <el-card class="box-card">
+      <h5 style="margin-bottom: 1rem">
+        добавить фото
+      </h5>
+
+      <el-button type="primary" @click="addFile">
+        выбрать фото
+      </el-button>
+
+      <el-button class="ml-3" type="success" style="margin-left: 1rem">
+        отправить на сервер
+      </el-button>
+
+      <input ref="file" type="file" style="display: none" @change="onChangeFile">
+
+      <br>
+
+      <div v-show="fileData" :style="{ display: 'block', marginTop: '2rem' }">
+        <el-text type="primary">
+          {{ fileData?.name }}
+          <el-button type="danger" :icon="Delete" circle @click="clearFileData" />
+        </el-text>
+      </div>
+    </el-card>
+
     <client-only>
       <ModalEditCardForSection
         :id="propsModalEdit.id"
@@ -150,6 +175,7 @@
         :title="propsModalEdit.title"
         :description="propsModalEdit.description"
         :button-name="propsModalEdit.buttonName"
+        :type="propsModalEdit.type"
       />
     </client-only>
   </section>
@@ -160,6 +186,10 @@ import { reactive, ref, computed } from 'vue'
 import type { FormInstance } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import { useMutation, useQuery } from '@vue/apollo-composable'
+import {
+  Delete
+} from '@element-plus/icons-vue'
+import object from 'async-validator/dist-types/validator/object'
 import { ICardBase, ICardValidForm } from '~/interfaces'
 import { CREATE_CARD_FOR_SECTION, DELETE_CARD_FOR_SECTION } from '~/apollo/mutation'
 import { GET_CARD_ABOUT_ME } from '~/apollo/query'
@@ -280,18 +310,46 @@ const propsModalEdit = ref<IEditCard>({
   welcome: '',
   title: '',
   description: '',
-  buttonName: ''
+  buttonName: '',
+  type: ''
 })
 
 // edit nav
 const editMenuDialogShow = ():void => {
   const card = cardAboutMe.value[0]
+
   propsModalEdit.value.id = card._id
   propsModalEdit.value.title = card.title
   propsModalEdit.value.description = card.description
   propsModalEdit.value.welcome = card.welcome
   propsModalEdit.value.buttonName = card.buttonName
+  propsModalEdit.value.type = card.type
   openClose()
+}
+
+// добавление файла
+const fileData = ref()
+const file = ref<HTMLInputElement | null>(null)
+
+const addFile = ():void => {
+  if (!file.value) {
+    return
+  }
+  file.value?.click()
+}
+
+const onChangeFile = () => {
+  console.log('onChangeFile')
+  // fileData.value = null
+  if (file.value?.files?.length === 0) {
+    return
+  }
+  fileData.value = file.value?.files?.[0]
+  console.log(fileData.value)
+}
+
+const clearFileData = (): void => {
+  fileData.value = null
 }
 
 </script>
