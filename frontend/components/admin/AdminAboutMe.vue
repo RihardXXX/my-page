@@ -149,7 +149,7 @@
         выбрать фото
       </el-button>
 
-      <el-button class="ml-3" type="success" style="margin-left: 1rem">
+      <el-button class="ml-3" type="success" style="margin-left: 1rem" :disabled="!fileData" @click="sendFileOnServer">
         отправить на сервер
       </el-button>
 
@@ -350,6 +350,13 @@ const onChangeFile = () => {
 
 const clearFileData = (): void => {
   fileData.value = null
+}
+
+const sendFileOnServer = ():void => {
+  if(!fileData.value) {
+    return
+  }
+  console.log('sendFileOnServer', fileData.value)
 }
 
 </script>

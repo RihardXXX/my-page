@@ -19,6 +19,7 @@ services:
       - api
       - auth
       - mailer
+      - files
     # указываем имя нашей изолированной сети сервисов
     networks:
       - my-page
@@ -129,11 +130,43 @@ services:
     networks:
       - my-page
 
+  # сервис который работает загрузкой файлов на сервер
+  files:
+    build: ./files
+    container_name: my-page-files-api
+    command: npm run start
+    restart: unless-stopped
+    environment:
+      - PORT=3004
+      # образец с 'mongodb://127.0.0.1:27017/api' просто локалхос меняем на хос образа монги
+      - MONGO_URL=mongodb://db_files:27017/files
+      - AUTH_URL=http://auth:3002
+    depends_on:
+      # запускаем его после запуска образа базы данных монго
+      - db_files
+    networks:
+      - my-page
+
+  # сервис который работает с базой данных берем готовый образ
+  db_files:
+    image: mongo:6.0.5-jammy
+    # даем имя контейнера чтобы при запуске найти именно его
+    container_name: my-page-db-files
+    # прописав порты мы можем с компаса подключится во внутрь контейнера
+    ports:
+      - "27018:27017"
+    # выносим монгу за пределы контейнера, чтобы при пересборке БД не стиралась (симлинк ссылка)
+    volumes:
+      - mongodb_files:/data/db
+    networks:
+      - my-page
+
 volumes:
   # чтобы иметь доступ везде к волюму они сохраняют состояние
   mongodb_api:
   mongodb_auth:
   mongodb_mailer:
+  mongodb_files:
 
 # создаем свою изолированную сеть
 networks:

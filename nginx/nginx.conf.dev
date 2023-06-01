@@ -27,4 +27,11 @@ server {
         # вырезаем и убираем auth чтобы внутри сервиса не дублировать auth строку
         rewrite ^/auth/(.*) /$1 break;
     }
+
+    # все запросы идут files по роуту "/files"
+    location /files {
+        proxy_pass http://files:3004;
+        # вырезаем и убираем files чтобы внутри сервиса не дублировать files строку
+        rewrite ^/files/(.*) /$1 break;
+    }
 }

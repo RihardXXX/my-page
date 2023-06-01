@@ -46,3 +46,8 @@ services:
     command: npm run dev
     volumes:
       - ./mailer/src:/usr/src/app/src
+
+  files:
+    command: npm run dev
+    volumes:
+      - ./files/src:/usr/src/app/src
