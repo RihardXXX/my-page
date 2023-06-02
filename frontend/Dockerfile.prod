@@ -17,9 +17,11 @@ COPY . .
 # === переменные окружения для билд сборки приложения, которые отпр из docker-compose.yml from args
 ARG API_SSR
 ARG API_CLIENT
+ARG API_FILES
 
 ENV API_SSR $API_SSR
 ENV API_CLIENT $API_CLIENT
+ENV API_FILES $API_FILES
 # ===
 
 # билдим для прода проект

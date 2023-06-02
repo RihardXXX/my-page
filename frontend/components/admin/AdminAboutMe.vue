@@ -155,6 +155,14 @@
 
       <input ref="file" type="file" style="display: none" @change="onChangeFile">
 
+      <el-text class="mx-1" type="primary" style="margin-left: 2rem">
+        формат допустимых файлов: png, jpg, jpeg
+      </el-text>
+
+      <el-text v-show="isErrorFileUploadServer" class="mx-1" type="danger" style="margin-left: 2rem">
+        формат  файла недопустим
+      </el-text>
+
       <br>
 
       <div v-show="fileData" :style="{ display: 'block', marginTop: '2rem' }">
@@ -329,6 +337,7 @@ const editMenuDialogShow = ():void => {
 
 // добавление файла
 const fileData = ref()
+const isErrorFileUploadServer = ref<boolean>(false)
 const file = ref<HTMLInputElement | null>(null)
 
 const addFile = ():void => {
@@ -350,13 +359,30 @@ const onChangeFile = () => {
 
 const clearFileData = (): void => {
   fileData.value = null
+  isErrorFileUploadServer.value = false
 }
 
-const sendFileOnServer = ():void => {
+const sendFileOnServer = async ():Promise<void> => {
   if(!fileData.value) {
     return
   }
-  console.log('sendFileOnServer', fileData.value)
+  isErrorFileUploadServer.value = false
+  const formData = new FormData();
+  formData.append('file', fileData.value)
+
+  try {
+    const response = await fetch('/files/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    console.log('result: ', result)
+  } catch (e) {
+    isErrorFileUploadServer.value = true
+    console.log('error sendFileOnServer/fetch', e)
+  }
 }
 
 </script>

@@ -32,6 +32,7 @@ services:
       args:
         - API_SSR=http://api:3001
         - API_CLIENT=/api
+        - API_FILES=/files
       dockerfile: Dockerfile.prod
     container_name: my-page-frontend
     command: npm run start
@@ -41,6 +42,8 @@ services:
       - API_SSR=http://api:3001
       # пробрасываем путь работы с апи в режиме client из браузера nuxt к серверу апи для useMutation
       - API_CLIENT=/api
+      # мы будем обращаться с клиента как будто бы к себе
+      - API_FILES=/files
     networks:
       - my-page
 
