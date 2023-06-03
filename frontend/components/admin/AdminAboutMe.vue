@@ -149,7 +149,7 @@
         выбрать фото
       </el-button>
 
-      <el-button class="ml-3" type="success" style="margin-left: 1rem" :disabled="!fileData" @click="sendFileOnServer">
+      <el-button class="ml-3" type="success" style="margin-left: 1rem" :disabled="!fileData || isLoadingFileUploadServer" @click="sendFileOnServer">
         отправить на сервер
       </el-button>
 
@@ -338,6 +338,7 @@ const editMenuDialogShow = ():void => {
 // добавление файла
 const fileData = ref()
 const isErrorFileUploadServer = ref<boolean>(false)
+const isLoadingFileUploadServer = ref<boolean>(false)
 const file = ref<HTMLInputElement | null>(null)
 
 const addFile = ():void => {
@@ -348,13 +349,10 @@ const addFile = ():void => {
 }
 
 const onChangeFile = () => {
-  console.log('onChangeFile')
-  // fileData.value = null
   if (file.value?.files?.length === 0) {
     return
   }
   fileData.value = file.value?.files?.[0]
-  console.log(fileData.value)
 }
 
 const clearFileData = (): void => {
@@ -363,24 +361,30 @@ const clearFileData = (): void => {
 }
 
 const sendFileOnServer = async ():Promise<void> => {
-  if(!fileData.value) {
+  if (!fileData.value) {
     return
   }
+
   isErrorFileUploadServer.value = false
-  const formData = new FormData();
+  const formData = new FormData()
   formData.append('file', fileData.value)
 
   try {
+    isLoadingFileUploadServer.value = true
     const response = await fetch('/files/upload', {
       method: 'POST',
       body: formData
-    });
+    })
 
-    const result = await response.json();
+    const result = await response.json()
 
-    console.log('result: ', result)
+    if (result.status) {
+      fileData.value = null
+    }
+    isLoadingFileUploadServer.value = false
   } catch (e) {
     isErrorFileUploadServer.value = true
+    isLoadingFileUploadServer.value = false
     console.log('error sendFileOnServer/fetch', e)
   }
 }
