@@ -368,6 +368,8 @@ const sendFileOnServer = async ():Promise<void> => {
   isErrorFileUploadServer.value = false
   const formData = new FormData()
   formData.append('file', fileData.value)
+  formData.append('app', 'my-page')
+  formData.append('category', 'about-my')
 
   try {
     isLoadingFileUploadServer.value = true

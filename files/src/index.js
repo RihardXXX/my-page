@@ -10,6 +10,8 @@ const path = require('path');
 const process = require('process');
 const { authenticate } = require('@google-cloud/local-auth');
 const { google } = require('googleapis');
+const {books} = require('googleapis/build/src/apis/books');
+const { FileType } = require('./models')
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -64,6 +66,8 @@ const uploadFile = async (file) => {
 
     return data;
 }
+
+
 
 // // работа с гугл диском
 // // If modifying these scopes, delete token.json.
@@ -171,6 +175,15 @@ app.post('/upload', async function(req, res) {
     if (!req.files) {
         return res.status(400).send('файл для загрузки не предоставлен');
     }
+
+    if (!req.body.app) {
+        return res.status(400).send('поле app пустое');
+    }
+
+    if (!req.body.category) {
+        return res.status(400).send('поле category пустое');
+    }
+
     const file = req.files.file;
     // узнаем расширение файла если не подходит то выдаем ошибку
     const extName = path.extname(file.name);
@@ -180,7 +193,36 @@ app.post('/upload', async function(req, res) {
         return res.status(422).send('формат файла не подходит');
     }
 
-    const data = await uploadFile(file);
+    let data;
+
+    try {
+        // сохранение на гугл диске
+        data = await uploadFile(file);
+    } catch (e) {
+        console.log('error uploadFile', e)
+    }
+
+    const { app, category } = req.body;
+    const { id } = data;
+
+    try {
+        // создание модели в БД
+        const fileType = await FileType.create({
+            fileId: id,
+            name: file.name,
+            mimeType: String(file.mimetype),
+            app: app,
+            category: category,
+            storage: 'google-drive',
+            url: 'test',
+        });
+
+        await fileType.save();
+
+    } catch (e) {
+        console.log('FileType.create error: ', e);
+        return false;
+    }
 
     return res.status(200).json({
         status: true
