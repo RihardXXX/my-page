@@ -67,6 +67,42 @@ const uploadFile = async (file) => {
     return data;
 }
 
+const getPhotoAboutMe = async () => {
+    let result = null;
+    try {
+        result = await FileType
+            .find({ app: 'my-page', category: 'about-my' }).exec();
+
+        if (!result.length) {
+            return null
+        }
+    } catch (e) {
+        console.log('file find error: ', e)
+    }
+
+    const service = google.drive({version: 'v3', auth});
+
+    const fileId = result[0].fileId;
+    const name = result[0].name;
+
+    try {
+        const file = await service.files.get({
+            fileId: fileId,
+            // alt: 'media',
+            fields: 'webViewLink'
+        });
+        // console.log(file);
+        return {
+            url: file.data.webViewLink,
+            name: name,
+        };
+    } catch (err) {
+        // TODO(developer) - Handle error
+        console.log('error await service.files.get: ', e)
+        // throw err;
+    }
+}
+
 
 
 // // работа с гугл диском
@@ -228,6 +264,21 @@ app.post('/upload', async function(req, res) {
         status: true
     });
 });
+
+app.get('/getAboutMePhoto', async (req, res) => {
+    console.log('get Photo')
+    const result = await getPhotoAboutMe();
+
+    if (!result) {
+        return res.status(200).json({
+            message: 'загруженная картинка отсутствует'
+        });
+    }
+
+    return res.status(200).json({
+        result
+    });
+})
 
 // старт базы данных
 const startMongo = async (dbPath) => {

@@ -165,12 +165,28 @@
 
       <br>
 
+      <h5 style="margin-top: 1rem">
+        загруженные на клиент
+      </h5>
+
       <div v-show="fileData" :style="{ display: 'block', marginTop: '2rem' }">
         <el-text type="primary">
           {{ fileData?.name }}
           <el-button type="danger" :icon="Delete" circle @click="clearFileData" />
         </el-text>
       </div>
+
+      <el-divider />
+
+      <h5 style="margin-bottom: 1rem">
+        загруженные на сервер
+      </h5>
+
+      <el-text type="primary">
+        имя файла на сервере
+        <el-button type="danger" :icon="Delete" circle @click="removeFileFromServer" />
+      </el-text>
+
     </el-card>
 
     <client-only>
@@ -190,7 +206,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, onMounted } from 'vue'
 import type { FormInstance } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import { useMutation, useQuery } from '@vue/apollo-composable'
@@ -390,6 +406,25 @@ const sendFileOnServer = async ():Promise<void> => {
     console.log('error sendFileOnServer/fetch', e)
   }
 }
+
+const removeFileFromServer = async (): Promise<void> => {
+  console.log('удалить файлы с сервера')
+}
+
+const initialFilesGoogleDrive = async (): Promise<void> => {
+  try {
+    const response = await fetch('/files/getAboutMePhoto')
+    const result = await response.json()
+    console.log(result)
+  } catch (e) {
+    console.log('error initialFilesGoogleDrive: ', e)
+  }
+}
+
+onMounted(async () => {
+  // инициализация файлов загруженных на сервер
+  await initialFilesGoogleDrive()
+})
 
 </script>
 
