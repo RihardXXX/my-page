@@ -182,10 +182,15 @@
         загруженные на сервер
       </h5>
 
-      <el-text type="primary">
-        имя файла на сервере
-        <el-button type="danger" :icon="Delete" circle @click="removeFileFromServer" />
+
+      <el-text v-show="fileServer" type="primary">
+        {{ fileServer?.name }}
+        <el-button type="danger" :icon="Delete" circle @click="removeFileFromServer(fileServer?.fileId)" />
       </el-text>
+
+      <br>
+
+      <el-image v-show="fileServer?.url" style="width: 100px; height: 100px" :src="`https://drive.google.com/uc?export=view&id=${fileServer?.fileId}`" fit="contain" />
 
     </el-card>
 
@@ -407,15 +412,44 @@ const sendFileOnServer = async ():Promise<void> => {
   }
 }
 
-const removeFileFromServer = async (): Promise<void> => {
-  console.log('удалить файлы с сервера')
+const fileServer = ref<{
+  url: string,
+  name: string,
+  fileId: string,
+} | null>(null)
+
+// const imgFile = computed<string>(() => {
+//   if (fileServer.value?.url) {
+//     let reader = new FileReader();
+//     reader.readAsDataURL(fileServer.value.url);
+//   }
+//   return ''
+// })
+
+const removeFileFromServer = async (fileId: string | undefined): Promise<void> => {
+  console.log('удалить файлы с сервера', fileId)
+  try {
+    const response = await fetch('/files/delete', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({
+        fileId,
+      })
+    })
+    const result = await response.json()
+    console.log('response: ', result)
+  } catch (e) {
+    console.log('error removeFileFromServer: ', e)
+  }
 }
 
 const initialFilesGoogleDrive = async (): Promise<void> => {
   try {
     const response = await fetch('/files/getAboutMePhoto')
-    const result = await response.json()
-    console.log(result)
+    const { result } = await response.json()
+    fileServer.value = result
   } catch (e) {
     console.log('error initialFilesGoogleDrive: ', e)
   }

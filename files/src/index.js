@@ -95,6 +95,7 @@ const getPhotoAboutMe = async () => {
         return {
             url: file.data.webViewLink,
             name: name,
+            fileId: fileId,
         };
     } catch (err) {
         // TODO(developer) - Handle error
@@ -278,6 +279,19 @@ app.get('/getAboutMePhoto', async (req, res) => {
     return res.status(200).json({
         result
     });
+})
+
+app.delete('/delete', async (req, res) => {
+    const { fileId } = req.body;
+
+    console.log('fileId: ', fileId);
+
+    // last code delete file from google drive
+
+
+    res.status(200).json({
+        xxx: 'xxx'
+    })
 })
 
 // старт базы данных
