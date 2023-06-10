@@ -96,12 +96,18 @@ const getPhotoAboutMe = async () => {
             url: file.data.webViewLink,
             name: name,
             fileId: fileId,
+            _id: result[0]._id
         };
     } catch (err) {
         // TODO(developer) - Handle error
         console.log('error await service.files.get: ', e)
         // throw err;
     }
+}
+
+const removeFileFromDrive = async (fileId, _id) => {
+    console.log('fileId: ', fileId);
+    console.log('_id: ', _id);
 }
 
 
@@ -282,11 +288,12 @@ app.get('/getAboutMePhoto', async (req, res) => {
 })
 
 app.delete('/delete', async (req, res) => {
-    const { fileId } = req.body;
+    const { fileId, _id } = req.body;
 
-    console.log('fileId: ', fileId);
+    // удалить на гугл диске
+    await removeFileFromDrive(fileId, _id);
 
-    // last code delete file from google drive
+    //  А потом уже с монги
 
 
     res.status(200).json({

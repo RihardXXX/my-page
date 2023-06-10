@@ -185,7 +185,7 @@
 
       <el-text v-show="fileServer" type="primary">
         {{ fileServer?.name }}
-        <el-button type="danger" :icon="Delete" circle @click="removeFileFromServer(fileServer?.fileId)" />
+        <el-button type="danger" :icon="Delete" circle @click="removeFileFromServer(fileServer)" />
       </el-text>
 
       <br>
@@ -412,11 +412,14 @@ const sendFileOnServer = async ():Promise<void> => {
   }
 }
 
-const fileServer = ref<{
+interface IFileServer {
   url: string,
   name: string,
   fileId: string,
-} | null>(null)
+  _id: string,
+}
+
+const fileServer = ref<IFileServer| null>(null)
 
 // const imgFile = computed<string>(() => {
 //   if (fileServer.value?.url) {
@@ -426,8 +429,7 @@ const fileServer = ref<{
 //   return ''
 // })
 
-const removeFileFromServer = async (fileId: string | undefined): Promise<void> => {
-  console.log('удалить файлы с сервера', fileId)
+const removeFileFromServer = async (fileServer: IFileServer): Promise<void> => {
   try {
     const response = await fetch('/files/delete', {
       method: 'DELETE',
@@ -435,7 +437,8 @@ const removeFileFromServer = async (fileId: string | undefined): Promise<void> =
         'Content-Type': 'application/json;charset=utf-8'
       },
       body: JSON.stringify({
-        fileId,
+        fileId: fileServer.fileId, // for google drive
+        _id: fileServer._id // for mongo
       })
     })
     const result = await response.json()
