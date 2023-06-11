@@ -140,16 +140,16 @@
       </h6>
     </el-card>
 
-    <el-card class="box-card">
+    <el-card v-loading="isLoadingServer" class="box-card">
       <h5 style="margin-bottom: 1rem">
         добавить фото
       </h5>
 
-      <el-button type="primary" @click="addFile">
+      <el-button :disabled="Boolean(fileServer?.url)"  type="primary" @click="addFile">
         выбрать фото
       </el-button>
 
-      <el-button class="ml-3" type="success" style="margin-left: 1rem" :disabled="!fileData || isLoadingFileUploadServer" @click="sendFileOnServer">
+      <el-button class="ml-3" type="success" style="margin-left: 1rem" :disabled="!fileData" @click="sendFileOnServer">
         отправить на сервер
       </el-button>
 
@@ -185,7 +185,17 @@
 
       <el-text v-show="fileServer" type="primary">
         {{ fileServer?.name }}
-        <el-button type="danger" :icon="Delete" circle @click="removeFileFromServer(fileServer)" />
+        <el-popconfirm
+          confirm-button-text="да"
+          cancel-button-text="нет"
+          title="Вы действительно хотите удалить файл с сервера"
+          width="400"
+          @confirm="removeFileFromServer(<IFileServer>fileServer)"
+        >
+          <template #reference>
+            <el-button type="danger" :icon="Delete" circle />
+          </template>
+        </el-popconfirm>
       </el-text>
 
       <br>
@@ -223,6 +233,7 @@ import { ICardBase, ICardValidForm } from '~/interfaces'
 import { CREATE_CARD_FOR_SECTION, DELETE_CARD_FOR_SECTION } from '~/apollo/mutation'
 import { GET_CARD_ABOUT_ME } from '~/apollo/query'
 import ModalEditCardForSection, { IEditCard } from '~/components/admin/ModalEditCardForSection.vue'
+import {FileEvent} from "vscode-languageserver-protocol";
 
 // форма для валидации ref for create item
 const formCreateCard = ref<FormInstance>()
@@ -359,7 +370,7 @@ const editMenuDialogShow = ():void => {
 // добавление файла
 const fileData = ref()
 const isErrorFileUploadServer = ref<boolean>(false)
-const isLoadingFileUploadServer = ref<boolean>(false)
+const isLoadingServer = ref<boolean>(false)
 const file = ref<HTMLInputElement | null>(null)
 
 const addFile = ():void => {
@@ -369,11 +380,15 @@ const addFile = ():void => {
   file.value?.click()
 }
 
-const onChangeFile = () => {
+const onChangeFile = (e: Event) => {
   if (file.value?.files?.length === 0) {
     return
   }
   fileData.value = file.value?.files?.[0]
+
+  // reset input element for
+  const target = e.target as HTMLInputElement;
+  target.value = ''
 }
 
 const clearFileData = (): void => {
@@ -393,7 +408,7 @@ const sendFileOnServer = async ():Promise<void> => {
   formData.append('category', 'about-my')
 
   try {
-    isLoadingFileUploadServer.value = true
+    isLoadingServer.value = true
     const response = await fetch('/files/upload', {
       method: 'POST',
       body: formData
@@ -404,11 +419,12 @@ const sendFileOnServer = async ():Promise<void> => {
     if (result.status) {
       fileData.value = null
     }
-    isLoadingFileUploadServer.value = false
+
+    await initialFilesGoogleDrive();
   } catch (e) {
-    isErrorFileUploadServer.value = true
-    isLoadingFileUploadServer.value = false
     console.log('error sendFileOnServer/fetch', e)
+  } finally {
+    isLoadingServer.value = false
   }
 }
 
@@ -431,6 +447,8 @@ const fileServer = ref<IFileServer| null>(null)
 
 const removeFileFromServer = async (fileServer: IFileServer): Promise<void> => {
   try {
+    isLoadingServer.value = true;
+
     const response = await fetch('/files/delete', {
       method: 'DELETE',
       headers: {
@@ -443,8 +461,11 @@ const removeFileFromServer = async (fileServer: IFileServer): Promise<void> => {
     })
     const result = await response.json()
     console.log('response: ', result)
+    await initialFilesGoogleDrive()
   } catch (e) {
     console.log('error removeFileFromServer: ', e)
+  } finally {
+    isLoadingServer.value = false;
   }
 }
 

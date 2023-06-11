@@ -73,6 +73,8 @@ const getPhotoAboutMe = async () => {
         result = await FileType
             .find({ app: 'my-page', category: 'about-my' }).exec();
 
+        // console.log('result: ', result);
+
         if (!result.length) {
             return null
         }
@@ -105,109 +107,26 @@ const getPhotoAboutMe = async () => {
     }
 }
 
-const removeFileFromDrive = async (fileId, _id) => {
-    console.log('fileId: ', fileId);
-    console.log('_id: ', _id);
+const removeFileFromDrive = async (fileId) => {
+    // console.log('fileId: ', fileId);
+
+    try {
+        const response = await google.drive({
+            version: 'v3',
+            auth: auth
+        }).files.delete({ // удаляем файл
+            fileId,
+        });
+
+        // console.log('response: ', response);
+        if (response.status === 204) {
+            return true;
+        }
+    } catch (err) {
+        // TODO(developer) - Handle error
+        console.log('error removeFileFromDrive: ', e)
+    }
 }
-
-
-
-// // работа с гугл диском
-// // If modifying these scopes, delete token.json.
-// const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
-// // The file token.json stores the user's access and refresh tokens, and is
-// // created automatically when the authorization flow completes for the first
-// // time.
-// const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-// const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
-//
-// /**
-//  * Reads previously authorized credentials from the save file.
-//  *
-//  * @return {Promise<OAuth2Client|null>}
-//  */
-// async function loadSavedCredentialsIfExist() {
-//     try {
-//         const content = await fs.readFile(TOKEN_PATH);
-//         const credentials = JSON.parse(content);
-//         return google.auth.fromJSON(credentials);
-//     } catch (err) {
-//         return null;
-//     }
-// }
-//
-// /**
-//  * Serializes credentials to a file comptible with GoogleAUth.fromJSON.
-//  *
-//  * @param {OAuth2Client} client
-//  * @return {Promise<void>}
-//  */
-// async function saveCredentials(client) {
-//     const content = await fs.readFile(CREDENTIALS_PATH);
-//     const keys = JSON.parse(content);
-//     const key = keys.installed || keys.web;
-//     const payload = JSON.stringify({
-//         type: 'authorized_user',
-//         client_id: key.client_id,
-//         client_secret: key.client_secret,
-//         refresh_token: client.credentials.refresh_token,
-//     });
-//     await fs.writeFile(TOKEN_PATH, payload);
-// }
-//
-// /**
-//  * Load or request or authorization to call APIs.
-//  *
-//  */
-// async function authorize() {
-//     let client = await loadSavedCredentialsIfExist();
-//
-//     console.log('client1: ', client);
-//
-//     if (client) {
-//         return client;
-//     }
-//
-//     console.log('SCOPES: ', SCOPES)
-//     console.log('CREDENTIALS_PATH', CREDENTIALS_PATH)
-//
-//     client = await authenticate({
-//         scopes: SCOPES,
-//         keyfilePath: CREDENTIALS_PATH,
-//         // keyfile: path.join(__dirname, 'credentials.json'),
-//     });
-//
-//     console.log('clientxxx: ', client);
-//
-//     if (client.credentials) {
-//         await saveCredentials(client);
-//     }
-//     return client;
-// }
-//
-// /**
-//  * Lists the names and IDs of up to 10 files.
-//  * @param {OAuth2Client} authClient An authorized OAuth2 client.
-//  */
-// async function listFiles(authClient) {
-//     console.log('run listFiles')
-//     const drive = google.drive({version: 'v3', auth: authClient});
-//     const res = await drive.files.list({
-//         pageSize: 10,
-//         fields: 'nextPageToken, files(id, name)',
-//     });
-//     const files = res.data.files;
-//     if (files.length === 0) {
-//         console.log('No files found.');
-//         return;
-//     }
-//
-//     console.log('Files:');
-//     files.map((file) => {
-//         console.log(`${file.name} (${file.id})`);
-//     });
-// }
-
 
 // рабочие роуты
 app.get('/', (req, res) => {
@@ -273,7 +192,7 @@ app.post('/upload', async function(req, res) {
 });
 
 app.get('/getAboutMePhoto', async (req, res) => {
-    console.log('get Photo')
+    // console.log('get Photo')
     const result = await getPhotoAboutMe();
 
     if (!result) {
@@ -290,15 +209,40 @@ app.get('/getAboutMePhoto', async (req, res) => {
 app.delete('/delete', async (req, res) => {
     const { fileId, _id } = req.body;
 
-    // удалить на гугл диске
-    await removeFileFromDrive(fileId, _id);
+    // проверяем есть ли в БД вообще файл с таким айди
+    try {
+        const response = await FileType.findById(_id).exec();
+        if (!response._id) {
+            throw new Error('файт с таким айди отсутствует');
+            return;
+        }
 
-    //  А потом уже с монги
+    } catch (e) {
+        console.log('await FileType.findById error: ', e);
+        return false;
+    }
 
+    // если есть файл с таким айди то уже удаляем с гугл диска его и возвращаем статус для удаления с базы
+    const status = await removeFileFromDrive(fileId);
 
-    res.status(200).json({
-        xxx: 'xxx'
-    })
+    if (!status) {
+        throw new Error('файл не удален');
+        return;
+    }
+
+    console.log('файл удален и пора его удалить с БД');
+    try {
+        const response = await FileType.deleteOne({ _id: _id });
+
+        // console.log('res: ', response);
+
+        res.status(200).json({
+            status: true,
+            description: 'файл удален с гугл диска и БД'
+        })
+    } catch (e) {
+        console.log()
+    }
 })
 
 // старт базы данных
